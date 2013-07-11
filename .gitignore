@@ -9,3 +9,6 @@ build/*
 *.xcodeproj
 *.hex
 *.o
+*.lproj
+*.xcdatamodel
+*.xccurrentversion
