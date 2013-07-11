@@ -12,7 +12,6 @@
  
 @interface rAppDelegate : NSObject <NSApplicationDelegate, NSBrowserDelegate, NSTableViewDataSource, NSTableViewDelegate, NSTextFieldDelegate>
 {
-   //IBOutlet NSBrowser* self.tvbrowser;
    FileSystemNode *rootNode;
    NSMutableArray* filmArray;
    NSMutableArray * archivArray;
@@ -28,15 +27,18 @@
 @property (assign) IBOutlet  NSButton* opentaste;
 @property (assign) IBOutlet  NSButton* magtaste;
 @property (assign) IBOutlet  NSButton* archivtaste;
+
 @property (assign) IBOutlet  NSTextField* suchfeld;
 @property (assign) IBOutlet  NSTextField* resultatfeld;
 @property (assign) IBOutlet  NSTextField* linkfeld;
+
 
 
 @property (readonly, strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
 @property (readonly, strong, nonatomic) NSManagedObjectModel *managedObjectModel;
 @property (readonly, strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 
+@property NSIndexSet * clickset;
 @property NSString * WDTV_Pfad;
 @property NSArray * WDTV_Array;
 
@@ -50,8 +52,8 @@
 - (IBAction)reportOpen:(id)sender;
 - (IBAction)reportMag:(id)sender;
 - (IBAction)reportDelete:(id)sender;
-- (IBAction)reportArchiv:(id)sender;
+- (IBAction)reportArchivAktualisieren:(id)sender;
 - (IBAction)reportDouble:(id)sender;
-
+- (IBAction)reportDeleteVonTable:(id)sender;
 - (NSArray*)FilmSammlung;
 @end

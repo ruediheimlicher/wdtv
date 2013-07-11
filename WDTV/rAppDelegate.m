@@ -69,6 +69,7 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
       {
          self.magtaste.enabled = YES;
          self.deletetaste.enabled = YES;
+         self.archivtaste.enabled = YES;
       }
    }
 }
@@ -76,20 +77,42 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
 - (void)browserClick:(id)sender
 {
    //NSTextFieldCell* selektierteZelle = (NSTextFieldCell*)[self.tvbrowser selectedCell];
-   //NSLog(@"browserClick Selected Cell: %@", [selektierteZelle stringValue]);
+   //NSLog(@"browserClick col %ld ",self.tvbrowser.selectedColumn );
+   long col=self.tvbrowser.selectedColumn ;
+   //NSLog(@"browserClick row %ld ",[self.tvbrowser selectedRowInColumn:col] );
+   long zeile = [self.tvbrowser selectedRowInColumn:col];
+   if (zeile <0 || zeile == NSNotFound)
+   {
+      zeile=0;
+   }
+   NSIndexSet* newset = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(col, zeile)];
+   
+   if (!([newset isEqualToIndexSet:self.clickset]))
+   {
+      self.linkfeld.stringValue = @"";
+      
+      
+      self.opentaste.enabled = NO;
+      self.magtaste.enabled = NO;
+      self.deletetaste.enabled = NO;
+      self.archivtaste.enabled = NO;
+      self.clickset = newset;
+   }
+   }
 
-   self.opentaste.enabled = NO;
-   self.magtaste.enabled = NO;
-   self.deletetaste.enabled = NO;
-}
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
    filmArray = [[NSMutableArray alloc]initWithCapacity:0];
    archivArray = [[NSMutableArray alloc]initWithCapacity:0];
    
-   [self.self.tvbrowser setTarget:self];
-   [self.self.tvbrowser setReusesColumns:NO];
+   [self.tvbrowser setTarget:self];
+   //[self.self.tvbrowser setReusesColumns:NO];
+   //[self.tvbrowser setWidth:100 ofColumn:0];
+   [self.tvbrowser sizeToFit];
+   [self.tvbrowser  setWidth:[self.self.tvbrowser columnWidthForColumnContentWidth:150] ofColumn:0];
+
+   [self.tvbrowser  setWidth:[self.self.tvbrowser columnWidthForColumnContentWidth:150] ofColumn:1];
 
    [self.self.tvbrowser setDelegate:self];
    [filmTable setDelegate:self];
@@ -110,7 +133,25 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
     [cell setTarget:self];
     [cell setTitle:@"play"];
    [[filmTable tableColumnWithIdentifier:@"play"]setDataCell:cell];
-   
+ 
+   NSButtonCell *deletecell = [[NSButtonCell alloc] init];
+   [deletecell setButtonType:NSMomentaryPushInButton];
+   [deletecell setBezelStyle: NSRoundRectBezelStyle];
+   [deletecell setControlSize: NSSmallControlSize];
+   [deletecell setAction:@selector(reportDeleteVonTable:)];
+   [deletecell setTarget:self];
+   [deletecell setTitle:@"delete"];
+   [[filmTable tableColumnWithIdentifier:@"delete"]setDataCell:deletecell];
+
+   NSButtonCell *movecell = [[NSButtonCell alloc] init];
+   [movecell setButtonType:NSMomentaryPushInButton];
+   [movecell setBezelStyle: NSRoundRectBezelStyle];
+   [movecell setControlSize: NSSmallControlSize];
+   [movecell setAction:@selector(reportMagVonTable:)];
+   [movecell setTarget:self];
+   [movecell setTitle:@">mag"];
+   [[filmTable tableColumnWithIdentifier:@"mag"]setDataCell:movecell];
+
    
    
    
@@ -134,7 +175,7 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
                      includingPropertiesForKeys:[NSArray arrayWithObject:NSURLNameKey]
                                         options:NSDirectoryEnumerationSkipsHiddenFiles
                                           error:&err];
-         NSLog(@"OrdnerArray: %@",[self.WDTV_Array description]);
+         //NSLog(@"OrdnerArray: %@",[self.WDTV_Array description]);
        }
  
    //self.Archiv_Pfad = [NSString stringWithFormat:@" /Documents/WDTVDaten/Archiv_WDTV.txt",NSHomeDirectory()];
@@ -143,8 +184,9 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    NSURL* Archiv_URL=[NSURL fileURLWithPath:self.Archiv_Pfad];
    if ([Filemanager fileExistsAtPath:self.Archiv_Pfad])//ist
    {
-      
-      //NSArray* OrdnerArray = [Filemanager contentsOfDirectoryAtPath:self.WDTV_Pfad error:&err];
+      NSError* err;
+      //NSArray* ArchivOrdnerArray = [Filemanager contentsOfDirectoryAtPath:self.Archiv_Pfad error:&err];
+      //NSLog(@"err: %@ ArchivOrdnerArray: %@",err,[ArchivOrdnerArray description]);
       NSArray* OrdnerArray=  [NSArray arrayWithContentsOfURL:Archiv_URL];
       //NSLog(@"OrdnerArray: %@",[OrdnerArray description]);
       
@@ -211,7 +253,8 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
                         //NSLog(@"OrdnerArray2: %@",[OrdnerArray2 description]);
                         for (NSURL* titel in OrdnerArray2)
                         {
-                           [sammlungArray addObject:[[titel path] lastPathComponent]];
+                           //[sammlungArray addObject:[[titel path] lastPathComponent]];
+                           [sammlungArray addObject:[titel path]];
                         }
                         
                      } // isDir Ordner1
@@ -238,6 +281,7 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    self.opentaste.enabled = NO;
    self.magtaste.enabled = NO;
    self.deletetaste.enabled = NO;
+   self.archivtaste.enabled = NO;
 
    NSString* suchstring = [self.suchfeld stringValue];
    //NSLog(@"reportSuchen: %@ WDTV_Pfad: %@",[self.suchfeld stringValue],self.WDTV_Pfad);
@@ -496,11 +540,55 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    }
    
    [[self.tvbrowser parentForItemsInColumn:[self.tvbrowser clickedColumn]]invalidateChildren];
-  
+   [[self.tvbrowser parentForItemsInColumn:1]invalidateChildren];
+
    [self.tvbrowser loadColumnZero];
    self.linkfeld.stringValue = @"";
    
 }
+
+- (IBAction)reportMagVonTable:(id)sender
+{
+   long selektierteZeile = [filmTable selectedRow];
+   NSLog(@"reportDeleteVonTable: selektierteZeile: %ld",selektierteZeile);
+   NSString* selektierterPfad = [[filmArray objectAtIndex:selektierteZeile ]objectForKey:@"url"];
+   
+   NSLog(@"reportMagVonTable selektierterPfad: *%@*", selektierterPfad);
+   
+   NSString* moveLink = [[[selektierterPfad stringByDeletingLastPathComponent]stringByDeletingLastPathComponent]stringByAppendingPathComponent:@"mag"];
+   
+   moveLink = [moveLink stringByAppendingPathComponent:[selektierterPfad lastPathComponent]];
+   NSLog(@"moveLink: %@",moveLink);
+   //[[NSWorkspace sharedWorkspace]openFile:moveLink ];
+   
+   
+   NSError* err=NULL;
+   NSFileManager* Filemanager = [NSFileManager defaultManager];
+   //NSLog(@"OrdnerArray vor: %@",[self.WDTV_Array description]);
+   //   [self.tvbrowser loadColumnZero];
+   
+   
+   int erfolg = [Filemanager moveItemAtPath:selektierterPfad toPath:moveLink error:&err];
+   //NSLog(@"mag erfolg: %d err: %@",erfolg, [err description]);
+   //NSLog(@"matrix: %@",[[self.tvbrowser matrixInColumn:2]description]);
+   if (erfolg)
+   {
+      [filmArray removeObjectAtIndex:selektierteZeile];
+      [filmTable reloadData];
+      
+      [[self.tvbrowser parentForItemsInColumn:1]invalidateChildren];
+      [self.tvbrowser loadColumnZero];
+   }
+      else
+   {
+      NSAlert *theAlert = [NSAlert alertWithError:err];
+      [theAlert runModal]; // Ignore return value.
+   }
+   
+    self.linkfeld.stringValue = @"";
+   
+}
+
 
 - (IBAction)reportDelete:(id)sender
 {
@@ -511,12 +599,20 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    if (erfolg)
    {
       NSLog(@"delete OK");
-       
-      [[self.tvbrowser parentForItemsInColumn:[self.tvbrowser clickedColumn]]invalidateChildren];
-
-      [self.tvbrowser loadColumnZero];
-      self.linkfeld.stringValue = @"";
-      
+      NSAlert *alert = [[NSAlert alloc] init];
+      [alert addButtonWithTitle:@"OK"];
+      [alert addButtonWithTitle:@"Cancel"];
+      [alert setMessageText:@"Delete Film?"];
+      [alert setInformativeText:@"Deleted films cannot be restored."];
+      [alert setAlertStyle:NSWarningAlertStyle];
+      if ([alert runModal] == NSAlertFirstButtonReturn)
+      {
+         // OK clicked, delete the record
+         [[self.tvbrowser parentForItemsInColumn:[self.tvbrowser clickedColumn]]invalidateChildren];
+         [[self.tvbrowser parentForItemsInColumn:1]invalidateChildren];
+         [self.tvbrowser loadColumnZero];
+         self.linkfeld.stringValue = @"";
+      }
       
    }
    else
@@ -526,9 +622,100 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
 
   }
 }
-- (IBAction)reportArchiv:(id)sender
+
+- (IBAction)reportDeleteVonTable:(id)sender
 {
-   NSLog(@"reportArchiv");
+   NSFileManager* Filemanager = [NSFileManager defaultManager];
+   NSError* err=NULL;
+   long selektierteZeile = [filmTable selectedRow];
+   //NSLog(@"reportDeleteVonTable: selektierteZeile: %ld",selektierteZeile);
+   NSString* selektierterPfad = [[filmArray objectAtIndex:selektierteZeile ]objectForKey:@"url"];
+   
+   NSLog(@"reportMagVonTable selektierterPfad: %@", selektierterPfad);
+   
+   int erfolg = [Filemanager removeItemAtPath:selektierterPfad error:&err];
+   NSLog(@"delete err: %@",[err description]);
+   if (erfolg)
+   {
+      NSLog(@"delete OK");
+      NSAlert *alert = [[NSAlert alloc] init];
+      [alert addButtonWithTitle:@"OK"];
+      [alert addButtonWithTitle:@"Cancel"];
+      [alert setMessageText:@"Delete Film?"];
+      [alert setInformativeText:@"Deleted films cannot be restored."];
+      [alert setAlertStyle:NSWarningAlertStyle];
+      if ([alert runModal] == NSAlertFirstButtonReturn)
+      {
+         // OK clicked, delete the record
+         [filmArray removeObjectAtIndex:selektierteZeile];
+         [filmTable reloadData];
+         [[self.tvbrowser parentForItemsInColumn:1]invalidateChildren];
+         [self.tvbrowser loadColumnZero];
+
+
+      }
+   }
+   else
+   {
+      NSAlert *theAlert = [NSAlert alertWithError:err];
+      [theAlert runModal]; // Ignore return value.
+      
+   }
+}
+
+
+- (IBAction)reportArchivieren:(id)sender
+{
+   NSLog(@"reportArchivieren return");
+   return;
+   NSTextFieldCell* selektierteZelle = (NSTextFieldCell*)[self.tvbrowser selectedCell];
+   NSLog(@"reportArchivieren Selected Cell: %@", [selektierteZelle stringValue]);
+   NSLog(@"filmLink: %@",filmLink);
+
+   NSMutableArray* filmOrdner = [[NSMutableArray alloc]initWithCapacity:0];
+   NSOpenPanel *openPanel  = [NSOpenPanel openPanel];
+   [openPanel setCanChooseFiles:NO];
+   [openPanel setCanChooseDirectories:YES];
+   
+   [openPanel setPrompt:@"Archiv"];
+   
+   [openPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
+      if (result == NSFileHandlingPanelOKButton)
+      {
+         NSLog(@"OK");
+         NSURL *fileURL = [openPanel URL]; //OpenDlg is my NSOpenPanel
+         NSLog(@"filePath raw: %@", [fileURL path]);
+         
+         NSString* destLink = [[fileURL path]stringByAppendingPathComponent:[filmLink lastPathComponent]];
+         NSLog(@"destLink : %@", destLink);
+
+         NSError* err;
+         NSFileManager* Filemanager = [NSFileManager defaultManager];
+
+         int erfolg = [Filemanager moveItemAtPath:filmLink toPath:destLink error:&err];
+         //NSLog(@"mag erfolg: %d err: %@",erfolg, [err description]);
+         if (erfolg==0)
+         {
+            NSAlert *theAlert = [NSAlert alertWithError:err];
+            [theAlert runModal]; // Ignore return value.
+         
+         
+         
+         [[self.tvbrowser parentForItemsInColumn:[self.tvbrowser clickedColumn]]invalidateChildren];
+         [[self.tvbrowser parentForItemsInColumn:1]invalidateChildren];
+
+         [self.tvbrowser loadColumnZero];
+         self.linkfeld.stringValue = @"";
+         }
+ 
+         
+      }
+   }];//
+}
+
+- (IBAction)reportArchivAktualisieren:(id)sender
+{
+   NSLog(@"reportArchivAktualisieren");
    NSMutableArray* filmOrdner = [[NSMutableArray alloc]initWithCapacity:0];
    NSOpenPanel *openPanel  = [NSOpenPanel openPanel];
    [openPanel setCanChooseFiles:NO];
@@ -605,21 +792,89 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
 - (IBAction)reportDouble:(id)sender
 {
    NSLog(@"reportDouble");
+   //NSLog(@"reportDouble archivArray: %@ ",archivArray);
    self.suchfeld.stringValue = @"";
    [filmArray removeAllObjects];
-   NSArray* sammelOrdner = [self FilmSammlung];
+   NSArray* sammelOrdner = [self FilmSammlung]; // Filme auf WDTV
    NSMutableArray* doppelOrdner = [[NSMutableArray alloc]initWithCapacity:0];
+   NSMutableArray* titelArray = [[NSMutableArray alloc]initWithCapacity:0];
+  NSError *error = NULL;
+   NSRegularExpression *zifferregex = [NSRegularExpression regularExpressionWithPattern:@"[0-9]+"
+                                                                                options:NSRegularExpressionCaseInsensitive
+                                                                                  error:&error];
+   NSRegularExpression *grupperegex = [NSRegularExpression regularExpressionWithPattern:@"Tatort"
+                                                                                options:NSRegularExpressionCaseInsensitive
+                                                                                  error:&error];
+   NSRegularExpression *blankregex = [NSRegularExpression regularExpressionWithPattern:@"^[ \t]+"
+                                                                               options:NSRegularExpressionCaseInsensitive
+                                                                                 error:&error];
+
+   
+   
    for (NSString* archivfilm in archivArray)
    {
-      //NSLog(@"archivfilm: %@",[archivfilm lastPathComponent]);
-      if ([sammelOrdner containsObject:[archivfilm lastPathComponent]])
-      {
-         [doppelOrdner addObject:archivfilm];
-         NSMutableDictionary* doppelDic = [NSMutableDictionary dictionaryWithObjectsAndKeys:[archivfilm lastPathComponent],@"titel",archivfilm, @"url", [NSNumber numberWithInt:0], @"mark",[NSNumber numberWithInt:1], @"playok", nil];
-         [filmArray addObject:doppelDic];
-
-      }
+         //NSLog(@"archivfilm: %@",[archivfilm lastPathComponent]);
+         NSString* suchFilmtitel = [[archivfilm lastPathComponent]stringByDeletingPathExtension];
+         
+         NSString* zifferregexstring  = [zifferregex stringByReplacingMatchesInString:suchFilmtitel
+                                                                      options:0
+                                                                        range:NSMakeRange(0, [suchFilmtitel length])
+                                                                 withTemplate:@""];
+         
+         
+         NSString* grupperegexstring  = [grupperegex stringByReplacingMatchesInString:zifferregexstring
+                                                                              options:0
+                                                                                range:NSMakeRange(0, [zifferregexstring length])
+                                                                         withTemplate:@""];
+         
+         
+         
+         NSString* blankregexstring  = [blankregex stringByReplacingMatchesInString:grupperegexstring
+                                                                            options:0
+                                                                              range:NSMakeRange(0, [grupperegexstring length])
+                                                                       withTemplate:@""];
+         
+         
+         
+         //NSLog(@"suchFilmtitel: %@ regexstring: %@ grupperegexstring: *%@* blankregexstring: *%@*",suchFilmtitel,regexstring,grupperegexstring, blankregexstring);
+         
+         [titelArray addObject:blankregexstring];
+         
    }
+   
+   NSLog(@"reportDouble titelArray: %@ ",titelArray);
+   
+   for (NSString* archivfilm in sammelOrdner) // Filme auf WDTV
+   {
+      {
+         //NSLog(@"archivfilm: %@",[archivfilm lastPathComponent]);
+         NSString* suchFilmtitel = [[archivfilm lastPathComponent]stringByDeletingPathExtension];
+         NSString* zifferregexstring  = [zifferregex stringByReplacingMatchesInString:suchFilmtitel
+                                                                              options:0
+                                                                                range:NSMakeRange(0, [suchFilmtitel length])
+                                                                         withTemplate:@""];
+         
+         NSString* grupperegexstring  = [grupperegex stringByReplacingMatchesInString:zifferregexstring
+                                                                              options:0
+                                                                                range:NSMakeRange(0, [zifferregexstring length])
+                                                                         withTemplate:@""];
+         
+         NSString* blankregexstring  = [blankregex stringByReplacingMatchesInString:grupperegexstring
+                                                                            options:0
+                                                                              range:NSMakeRange(0, [grupperegexstring length])
+                                                                       withTemplate:@""];
+         
+         
+         if ([titelArray containsObject:blankregexstring])
+         {
+            [doppelOrdner addObject:archivfilm];
+            NSMutableDictionary* doppelDic = [NSMutableDictionary dictionaryWithObjectsAndKeys:blankregexstring,@"titel",archivfilm, @"url", [NSNumber numberWithInt:0], @"mark",[NSNumber numberWithInt:1], @"playok", nil];
+            [filmArray addObject:doppelDic];
+            
+         }
+      }//bis
+   }
+   
    NSLog(@"reportDouble doppelOrdner: %@ ",doppelOrdner);
    if ([doppelOrdner count]==0)
    {
@@ -628,7 +883,7 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
 
    }
    [filmTable reloadData];
-   NSLog(@"reportDouble doppelOrdner: %@ ",doppelOrdner);
+  // NSLog(@"reportDouble doppelOrdner: %@ ",doppelOrdner);
 }
 
 - (id)rootItemForBrowser:(NSBrowser *)browser
@@ -646,6 +901,7 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    
    FileSystemNode *node = (FileSystemNode *)item;
    //NSLog(@"numberOfChildrenOfItem: %ld",node.children.count);
+   self.linkfeld.stringValue = @"";
    return node.children.count;
 }
 
@@ -670,9 +926,9 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
     NSRange r = [node.displayName rangeOfString:@"couldn’t" options:NSCaseInsensitiveSearch];
    
    //if ([node.displayName rangeOfString:@"couldn’t" options:NSCaseInsensitiveSearch].location)
-   if (r.length && r.length < NSNotFound)
+   //if (r.length && r.length < NSNotFound)
    {
-      NSLog(@"objectValueForItem kill loc: %ld",r.length);
+      //NSLog(@"objectValueForItem kill loc: %ld",r.length);
       //return NULL;
    }
    
@@ -911,6 +1167,7 @@ objectValueForTableColumn:(NSTableColumn *)tableColumn
    //NSLog(@"tableViewSelectionDidChange %d",[[note object]selectedRow]);
    {
       [[note object]selectedRow];
+      self.linkfeld.stringValue = @"";
    }
    // [[note object] scrollRowToVisible:[[note object]selectedRow]];
 }
@@ -922,7 +1179,13 @@ objectValueForTableColumn:(NSTableColumn *)tableColumn
     [[self window] setDefaultButtonCell:[self.suchentaste cell]];
 }
 
+/*
+- (NSIndexSet *)browser:(NSBrowser *)browser selectionIndexesForProposedSelection:(NSIndexSet *)proposedSelectionIndexes inColumn:(NSInteger)column
 
+{
+   NSLog(@"selectionIndexesForProposedSelection");
+}
+*/
 - (void) FensterSchliessenAktion:(NSNotification*)note
 {
    //NSLog(@"FensterSchliessenAktion");
