@@ -1,0 +1,933 @@
+//
+//  rAppDelegate.m
+//  WDTV
+//
+//  Created by Ruedi Heimlicher on 05.Juli.13.
+//  Copyright (c) 2013 Ruedi Heimlicher. All rights reserved.
+//
+
+#import "rAppDelegate.h"
+#import "FileSystemNode.h"
+
+@implementation rAppDelegate
+
+@synthesize persistentStoreCoordinator = _persistentStoreCoordinator;
+@synthesize managedObjectModel = _managedObjectModel;
+@synthesize managedObjectContext = _managedObjectContext;
+
+-(void) monitorVolumes
+{
+   [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:self selector: @selector(volumesChanged:) name:NSWorkspaceDidMountNotification object: nil];
+   [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:self selector: @selector(volumesChanged:) name:NSWorkspaceDidUnmountNotification object:nil];
+}
+
+
+
+void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSString *freig)
+{
+   
+   // http://www.osxentwicklerforum.de/index.php?page=Thread&threadID=24276
+   // http://stackoverflow.com/questions/6804541/getting-applescript-return-value-in-obj-c
+   //NSString *mountString = [NSString localizedStringWithFormat:@"if not (exists disk freig)\n display dialog \"mounted\" \nend if\n",freig];
+   
+ //  NSString *mountString = [NSString localizedStringWithFormat:@"tell application \"Finder\"\n if (exists disk \"WD_TV\") then\nbeep\nelse\nmount volume \"smb://%@:%@@%@/%@\"\nend if\nend tell\n",usr,pwd,serv,freig];
+
+   // Pfad aus Informationsfenster
+   NSString *mountString = [NSString localizedStringWithFormat:@"tell application \"Finder\"\n if (exists disk \"WD_TV\") then\nbeep\nelse\nmount volume \"smb://WDTVLIVE._smb._tcp.local/WD_TV\"\nend if\nend tell\n"];
+
+   //NSLog(@"mountString: %@",mountString);
+   NSAppleScript *script = [[NSAppleScript alloc] initWithSource:mountString];
+   
+   NSDictionary *errorMessage = nil;
+   NSAppleEventDescriptor *result = [script executeAndReturnError:&errorMessage];
+   //NSLog(@"mount: %@",result);
+}
+
+-(void) volumesChanged: (NSNotification*) notification
+{
+   NSLog(@"dostuff");
+}
+
+- (void)browserCellSelected:(id)sender
+{
+   NSIndexPath *indexPath = [self.tvbrowser selectionIndexPath];
+   
+   //NSLog(@"Selected Item: %@ l: %ld", [indexPath description],(unsigned long)[indexPath length] );
+   NSTextFieldCell* selektierteZelle = (NSTextFieldCell*)[self.tvbrowser selectedCell];
+   //NSLog(@"Selected Cell: %@", [selektierteZelle stringValue]);
+   
+   long l=[indexPath length];
+   int index = [indexPath indexAtPosition:l-1];// letzter Index
+   filmLink = [[[self.tvbrowser itemAtRow: index inColumn:l-1]URL]path] ; //
+   filmURL = [[self.tvbrowser itemAtRow: index inColumn:l-1]URL];
+    //NSLog(@"filmLink: %@ filmURL: %@",filmLink   ,filmURL);
+   if ([filmLink length])
+   {
+      self.linkfeld.stringValue = filmLink;
+      self.opentaste.enabled = YES;
+      if (l==3)
+      {
+         self.magtaste.enabled = YES;
+         self.deletetaste.enabled = YES;
+      }
+   }
+}
+
+- (void)browserClick:(id)sender
+{
+   //NSTextFieldCell* selektierteZelle = (NSTextFieldCell*)[self.tvbrowser selectedCell];
+   //NSLog(@"browserClick Selected Cell: %@", [selektierteZelle stringValue]);
+
+   self.opentaste.enabled = NO;
+   self.magtaste.enabled = NO;
+   self.deletetaste.enabled = NO;
+}
+
+- (void)applicationDidFinishLaunching:(NSNotification *)aNotification
+{
+   filmArray = [[NSMutableArray alloc]initWithCapacity:0];
+   archivArray = [[NSMutableArray alloc]initWithCapacity:0];
+   
+   [self.self.tvbrowser setTarget:self];
+   [self.self.tvbrowser setReusesColumns:NO];
+
+   [self.self.tvbrowser setDelegate:self];
+   [filmTable setDelegate:self];
+   [filmTable setDataSource:self];
+   
+   
+   
+   
+    NSButtonCell *cell = [[NSButtonCell alloc] init];
+    [cell setButtonType:NSMomentaryPushInButton];
+   [cell setBezelStyle: NSRoundRectBezelStyle];
+   [cell setControlSize: NSSmallControlSize];
+    //[cell setBordered:YES];
+    //[cell setImagePosition:NSImageRight];
+    //[cell setImage:[NSImage imageNamed:@"SizeCellReveal"]];
+    //[cell setAlternateImage:[NSImage imageNamed:@"SizeCellRevealHighlighted"]];
+    [cell setAction:@selector(reportPlay:)];
+    [cell setTarget:self];
+    [cell setTitle:@"play"];
+   [[filmTable tableColumnWithIdentifier:@"play"]setDataCell:cell];
+   
+   
+   
+   
+   [self.tvbrowser  setDoubleAction:@selector(browserCellSelected:)];
+   [self.tvbrowser  setAction:@selector(browserClick:)];
+
+   
+   mountVolumeAppleScript(@"ruediheimlicher",@"rh47",@"WDTVLIVE.local",@"WD_TV");
+   // Insert code here to initialize your application
+   self.WDTV_Pfad = [NSString stringWithFormat:@"/Volumes/WD_TV"];
+   //NSLog(@"WDTV_Pfad: %@",self.WDTV_Pfad);
+   
+   NSURL* WDTV_URL=[NSURL fileURLWithPath:self.WDTV_Pfad];
+   NSFileManager *Filemanager=[NSFileManager defaultManager];
+   NSError* err=NULL;
+   if ([Filemanager fileExistsAtPath:self.WDTV_Pfad])//ist
+       {
+          //NSArray* OrdnerArray = [Filemanager contentsOfDirectoryAtPath:self.WDTV_Pfad error:&err];
+          //NSArray* OrdnerArray
+          self.WDTV_Array =  [Filemanager contentsOfDirectoryAtURL:[NSURL fileURLWithPath:self.WDTV_Pfad]
+                     includingPropertiesForKeys:[NSArray arrayWithObject:NSURLNameKey]
+                                        options:NSDirectoryEnumerationSkipsHiddenFiles
+                                          error:&err];
+         NSLog(@"OrdnerArray: %@",[self.WDTV_Array description]);
+       }
+ 
+   //self.Archiv_Pfad = [NSString stringWithFormat:@" /Documents/WDTVDaten/Archiv_WDTV.txt",NSHomeDirectory()];
+ self.Archiv_Pfad = [NSString stringWithFormat:@"%@/Documents/WDTVDaten/Archiv_WDTV.txt",NSHomeDirectory()];
+   NSLog(@"self.Archiv_Pfad: %@",self.Archiv_Pfad);
+   NSURL* Archiv_URL=[NSURL fileURLWithPath:self.Archiv_Pfad];
+   if ([Filemanager fileExistsAtPath:self.Archiv_Pfad])//ist
+   {
+      
+      //NSArray* OrdnerArray = [Filemanager contentsOfDirectoryAtPath:self.WDTV_Pfad error:&err];
+      NSArray* OrdnerArray=  [NSArray arrayWithContentsOfURL:Archiv_URL];
+      //NSLog(@"OrdnerArray: %@",[OrdnerArray description]);
+      
+      for (NSString* tempurl in OrdnerArray)
+      {
+         //NSLog(@"tempurl: %@",[tempurl  lastPathComponent]);
+         [archivArray addObject:tempurl];
+      }
+      //NSLog(@"archivArray: %@",[archivArray description]);
+   }
+
+   
+   
+   NSNotificationCenter * nc;
+	nc=[NSNotificationCenter defaultCenter];
+   [nc addObserver:self
+			 selector:@selector(FensterSchliessenAktion:)
+				  name:@"NSWindowWillCloseNotification"
+				object:nil];
+
+}
+
+- (NSArray*)FilmSammlung
+{
+   NSMutableArray* sammlungArray = [[NSMutableArray alloc]initWithCapacity:0];
+   NSFileManager *Filemanager=[NSFileManager defaultManager];
+   NSError* err=NULL;
+   NSString* sammelPfad = self.WDTV_Pfad;
+   if ([Filemanager fileExistsAtPath:sammelPfad])//ist
+   {
+      //NSArray* OrdnerArray = [Filemanager contentsOfDirectoryAtPath:self.WDTV_Pfad error:&err];
+      //NSArray* OrdnerArray
+      NSArray* OrdnerArray0 =  [Filemanager contentsOfDirectoryAtURL:[NSURL fileURLWithPath:sammelPfad]
+                                    includingPropertiesForKeys:[NSArray arrayWithObject:NSURLNameKey]
+                                                       options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                         error:&err];
+      //NSLog(@"OrdnerArray0: %@",[OrdnerArray0 description]);
+      BOOL isDir;
+      if ([OrdnerArray0 count])
+      {
+         for (NSURL* unterorderfad in OrdnerArray0 )
+         {
+            
+            if([Filemanager fileExistsAtPath:[unterorderfad path] isDirectory:&isDir] && isDir)
+            {
+               NSArray* OrdnerArray1 =  [Filemanager contentsOfDirectoryAtURL:unterorderfad
+                                                   includingPropertiesForKeys:[NSArray arrayWithObject:NSURLNameKey]
+                                                                      options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                        error:&err];
+               //NSLog(@"OrdnerArray1: %@",[OrdnerArray1 description]);
+               
+               if ([OrdnerArray1 count])
+               {
+                  for (NSURL* unterorderfad in OrdnerArray1 )
+                  {
+                     
+                     if([Filemanager fileExistsAtPath:[unterorderfad path] isDirectory:&isDir] && isDir)
+                     {
+                        sammelPfad = unterorderfad;
+                        NSArray* OrdnerArray2 =  [Filemanager contentsOfDirectoryAtURL:unterorderfad
+                                                            includingPropertiesForKeys:[NSArray arrayWithObject:NSURLNameKey]
+                                                                               options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                                 error:&err];
+                        //NSLog(@"OrdnerArray2: %@",[OrdnerArray2 description]);
+                        for (NSURL* titel in OrdnerArray2)
+                        {
+                           [sammlungArray addObject:[[titel path] lastPathComponent]];
+                        }
+                        
+                     } // isDir Ordner1
+                  
+                  } // for order1 count
+                  
+               }// orderarray1 count
+            } // isDir in Order0
+            
+         } // for order0
+      
+      }// orderarray0
+   }
+   //NSLog(@"sammlungArray: %@",[sammlungArray description]);
+   return sammlungArray;
+}
+
+- (IBAction)reportSuchen:(id)sender;
+{
+   [filmArray removeAllObjects];
+   [filmTable reloadData];
+   self.resultatfeld.stringValue =@"";
+   
+   self.opentaste.enabled = NO;
+   self.magtaste.enabled = NO;
+   self.deletetaste.enabled = NO;
+
+   NSString* suchstring = [self.suchfeld stringValue];
+   //NSLog(@"reportSuchen: %@ WDTV_Pfad: %@",[self.suchfeld stringValue],self.WDTV_Pfad);
+   
+   //NSLog(@"rootNode: %@",[[rootNode children] description]);
+   NSDictionary* childrenDic = [rootNode childrenDic];
+   NSArray* childrenKeyArray = [[rootNode childrenDic]allKeys];
+   //NSLog(@"childrenKeyArray: %@",childrenKeyArray);
+   NSFileManager *Filemanager=[NSFileManager defaultManager];
+   NSError* err=NULL;
+   NSString* archivVolumePfad = @"/Volumes/RH 1TB";
+   BOOL archivda = [Filemanager fileExistsAtPath:archivVolumePfad];
+   NSLog(@"archivda: %d",archivda);
+   // Archiv durchsuchen
+   for (NSString* temppfad in archivArray)
+   {
+      if ([temppfad rangeOfString:suchstring options:NSCaseInsensitiveSearch].length)
+      {
+         
+         NSMutableDictionary* findDic = [NSMutableDictionary dictionaryWithObjectsAndKeys:[temppfad lastPathComponent],@"titel",temppfad, @"url", [NSNumber numberWithInt:0], @"mark",[NSNumber numberWithInt:archivda], @"playok", nil];
+         [filmArray addObject:findDic];
+         if ([self.resultatfeld.stringValue length])
+         {
+            self.resultatfeld.stringValue = [NSString stringWithFormat:@"%@ \n %@",self.resultatfeld.stringValue,temppfad];
+         }
+         else
+         {
+            self.resultatfeld.stringValue = temppfad;
+         }
+        
+         
+      }
+      
+   }
+   
+   // rootnode durchsuchen
+   for (NSString* key0 in childrenKeyArray)
+   {
+      //NSLog(@"\n\n*********************************** key0: %@",key0);
+
+      FileSystemNode* node0 = [childrenDic objectForKey:key0];
+      //NSLog(@"key0: %@ *** node0: %@",key0,[node0 description]);
+      if ([key0 rangeOfString:suchstring options:NSCaseInsensitiveSearch].length)
+      {
+         NSLog(@"Name da in node0: %@",[node0 URL]);
+      }
+      // Ebene node1 durchsuchen
+     // NSLog(@"node0 children: %@",[node0 children]);
+      
+      NSArray* childrenArray0 = [node0 children];
+      NSDictionary* children1Dic = [node0 childrenDic];
+      
+      //NSLog(@"node0 children1Dic: %@",[children1Dic description]);
+      NSArray* childrenKey1Array = [[node0 childrenDic]allKeys];
+      //NSLog(@"node0 childrenKey1Array: %@",childrenKey1Array);
+      for (NSString* key1 in childrenKey1Array)
+      {
+         //NSLog(@"\n\n*************** key1: %@",key1);
+         FileSystemNode* node1 = [children1Dic objectForKey:key1];
+         
+         //NSLog(@"key0: %@ ***  key1: %@ *** node1: %@",key0,key1,[node1 description]);
+         
+         if ([key1 rangeOfString:suchstring options:NSCaseInsensitiveSearch].length)
+         {
+            //NSLog(@"Name da in node 1: %@",[node1 URL]);
+            NSMutableDictionary* findDic = [NSMutableDictionary dictionaryWithObjectsAndKeys:key1,@"titel",[node1 URL], @"url", [NSNumber numberWithInt:0], @"mark",[NSNumber numberWithInt:1], @"playok", nil];
+            [filmArray addObject:findDic];
+            if ([self.resultatfeld.stringValue length])
+            {
+               self.resultatfeld.stringValue = [NSString stringWithFormat:@"%@ \n %@",self.resultatfeld.stringValue,[[node1 URL] path]];
+            }
+            else
+            {
+               self.resultatfeld.stringValue = [[node1 URL] path];
+            }
+
+         }
+         
+         
+         // Ebene node2 durchsuchen
+         NSArray* childrenArray1 = [node1 children];
+         NSDictionary* children2Dic = [node1 childrenDic];
+         NSArray* childrenKey2Array = [[node1 childrenDic]allKeys];
+         for (NSString* key2 in childrenKey2Array)
+         {
+
+            FileSystemNode* node2 = [children2Dic objectForKey:key2];
+            
+
+            if ([key2 rangeOfString:suchstring options:NSCaseInsensitiveSearch].length)
+            {
+               NSMutableDictionary* findDic = [NSMutableDictionary dictionaryWithObjectsAndKeys:key2, @"titel",[[node2 URL]path],@"url",[NSNumber numberWithInt:0], @"mark",[NSNumber numberWithInt:1], @"playok", nil];
+               [filmArray addObject:findDic];
+               [filmTable reloadData];
+               //NSLog(@"Name da in node 2: %@",[node2 URL]);
+               if ([self.resultatfeld.stringValue length])
+               {
+                  self.resultatfeld.stringValue = [NSString stringWithFormat:@"%@ \n %@",self.resultatfeld.stringValue,[[node2 URL] path]];
+               }
+               else
+               {
+                  self.resultatfeld.stringValue = [[node2 URL] path];
+               }
+
+            }
+            
+            NSDictionary* children3Dic = [node2 childrenDic];
+            NSArray* childrenKey3Array = [[node2 childrenDic]allKeys];
+            //NSLog(@"node0 childrenKey3Array: %@",childrenKey3Array);
+            
+         }
+         
+         
+         
+      }
+      
+       
+   }// for tempkey
+   
+   //NSLog(@"filmArray: : %@",[filmArray description]);
+  // FileSystemNode* node1 = [childrenDic objectForKey:@"Tatort"];
+  // NSLog(@"node1: %@",[[node1 children] description]);
+  // NSDictionary* children1Dic = [node1 childrenDic];
+   //NSLog(@"children1Keys: %@",[children1Dic allKeys]);
+   
+   
+   
+   if ([filmArray count]==0)
+   {
+      NSMutableDictionary* findDic = [NSMutableDictionary dictionaryWithObjectsAndKeys:@"Kein Film gefunden", @"titel",@"",@"url",[NSNumber numberWithInt:0], @"mark",[NSNumber numberWithInt:1], @"playok", nil];
+      [filmArray addObject:findDic];
+      [filmTable reloadData];
+      
+   }
+   [filmTable reloadData];
+
+   return;
+   
+   
+   for (NSURL* pfadURL in self.WDTV_Array)
+   {
+      NSString* tempPfadstring = [pfadURL path];
+      NSRange r = [tempPfadstring rangeOfString:suchstring];
+      //NSLog(@"Pfad %@ r: %ld %ld",tempPfadstring, (unsigned long)r.location,(unsigned long)r.length);
+      if ([tempPfadstring rangeOfString:suchstring options:NSCaseInsensitiveSearch].length)
+      {
+         //NSLog(@"File da in %@ r: %ld %ld",tempPfadstring, (unsigned long)r.location,(unsigned long)r.length);
+         
+      }
+         
+      //NSLog(@"File da");
+   
+     //NSLog(@"pfadzeile: %@",pfadzeile);
+     // NSString* childpfad = pfadzeile;
+      //NSURL* WDTV_URL=[NSURL fileURLWithPath:pfadzeile];
+
+      NSArray* OrdnerArray= [Filemanager contentsOfDirectoryAtURL:pfadURL
+              includingPropertiesForKeys:[NSArray arrayWithObject:NSURLNameKey]
+                                 options:NSDirectoryEnumerationSkipsHiddenFiles
+                                   error:&err];
+      BOOL istOrdner=NO;
+      //NSLog(@"OrdnerArray: %@ Pfad: %@",[OrdnerArray description],[pfadURL lastPathComponent]);
+      for (NSURL* pfadURL in OrdnerArray)
+      {
+         
+         if ([[pfadURL path] rangeOfString:suchstring options:NSCaseInsensitiveSearch].length)
+         {
+            NSRange r=[[pfadURL path] rangeOfString:suchstring options:NSCaseInsensitiveSearch];
+            //NSLog(@"File da in %@ r: %ld %ld",pfadURL, (unsigned long)r.location,(unsigned long)r.length);
+            if ([self.resultatfeld.stringValue length])
+            {
+            self.resultatfeld.stringValue = [NSString stringWithFormat:@"%@ \n %@",self.resultatfeld.stringValue,[pfadURL path]];
+            }
+            else
+            {
+               self.resultatfeld.stringValue = [pfadURL path];
+            }
+         }
+         
+         
+         NSArray* SubOrdnerArray= [Filemanager contentsOfDirectoryAtURL:pfadURL
+                                             includingPropertiesForKeys:[NSArray arrayWithObject:NSURLNameKey]
+                                                                options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                  error:&err];
+         for (NSURL* subpfadURL in SubOrdnerArray)
+         {
+            
+            if ([[subpfadURL path] rangeOfString:suchstring options:NSCaseInsensitiveSearch].length)
+            {
+               NSRange r=[[subpfadURL path] rangeOfString:suchstring options:NSCaseInsensitiveSearch];
+               //NSLog(@"File da in %@ r: %ld %ld",subpfadURL, (unsigned long)r.location,(unsigned long)r.length);
+               if ([self.resultatfeld.stringValue length])
+               {
+                  self.resultatfeld.stringValue = [NSString stringWithFormat:@"%@ \n %@",self.resultatfeld.stringValue,[subpfadURL path]];
+               }
+               else
+               {
+
+               self.resultatfeld.stringValue = [subpfadURL path];
+               }
+               
+            }
+            
+         }
+      }
+      
+
+      
+   }
+
+   [filmTable reloadData];
+   }
+
+- (IBAction)reportOpen:(id)sender
+{
+    NSFileManager* Filemanager = [NSFileManager defaultManager];
+   [[NSWorkspace sharedWorkspace]openFile:filmLink ];
+}
+
+- (IBAction)reportPlay:(id)sender
+{
+   long selektierteZeile = [filmTable selectedRow];
+   NSLog(@"reportPlay: selektierteZeile: %ld",selektierteZeile);
+   NSString* selektierterPfad = [[filmArray objectAtIndex:selektierteZeile ]objectForKey:@"url"];
+   NSLog(@"reportPlay selektierterPfad: %@", selektierterPfad);
+
+   NSFileManager* Filemanager = [NSFileManager defaultManager];
+   [[NSWorkspace sharedWorkspace]openFile:selektierterPfad ];
+}
+
+
+- (IBAction)reportMag:(id)sender
+{
+   NSTextFieldCell* selektierteZelle = (NSTextFieldCell*)[self.tvbrowser selectedCell];
+   //NSLog(@"reportMag Selected Cell: %@", [selektierteZelle stringValue]);
+
+   NSString* moveLink = [[[filmLink stringByDeletingLastPathComponent]stringByDeletingLastPathComponent]stringByAppendingPathComponent:@"Mag"];
+   //NSString* magLink = moveLink;
+   moveLink = [moveLink stringByAppendingPathComponent:[filmLink lastPathComponent]];
+   //NSLog(@"moveLink: %@",moveLink);
+   //[[NSWorkspace sharedWorkspace]openFile:moveLink ];
+   
+   
+   NSError* err=NULL;
+   NSFileManager* Filemanager = [NSFileManager defaultManager];
+   //NSLog(@"OrdnerArray vor: %@",[self.WDTV_Array description]);
+//   [self.tvbrowser loadColumnZero];
+   
+   int erfolg = [Filemanager moveItemAtPath:filmLink toPath:moveLink error:&err];
+   //NSLog(@"mag erfolg: %d err: %@",erfolg, [err description]);
+   //NSLog(@"matrix: %@",[[self.tvbrowser matrixInColumn:2]description]);
+   if (erfolg==0)
+   {
+      NSAlert *theAlert = [NSAlert alertWithError:err];
+      [theAlert runModal]; // Ignore return value.
+   }
+   
+   [[self.tvbrowser parentForItemsInColumn:[self.tvbrowser clickedColumn]]invalidateChildren];
+  
+   [self.tvbrowser loadColumnZero];
+   self.linkfeld.stringValue = @"";
+   
+}
+
+- (IBAction)reportDelete:(id)sender
+{
+   NSFileManager* Filemanager = [NSFileManager defaultManager];
+   NSError* err=NULL;
+   int erfolg = [Filemanager removeItemAtPath:filmLink error:&err];
+   NSLog(@"delete err: %@",[err description]);
+   if (erfolg)
+   {
+      NSLog(@"delete OK");
+       
+      [[self.tvbrowser parentForItemsInColumn:[self.tvbrowser clickedColumn]]invalidateChildren];
+
+      [self.tvbrowser loadColumnZero];
+      self.linkfeld.stringValue = @"";
+      
+      
+   }
+   else
+   {
+      NSAlert *theAlert = [NSAlert alertWithError:err];
+      [theAlert runModal]; // Ignore return value.
+
+  }
+}
+- (IBAction)reportArchiv:(id)sender
+{
+   NSLog(@"reportArchiv");
+   NSMutableArray* filmOrdner = [[NSMutableArray alloc]initWithCapacity:0];
+   NSOpenPanel *openPanel  = [NSOpenPanel openPanel];
+   [openPanel setCanChooseFiles:NO];
+   [openPanel setCanChooseDirectories:YES];
+   
+   [openPanel setPrompt:@"Archiv"];
+   
+   [openPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result) {
+      if (result == NSFileHandlingPanelOKButton)
+      {
+         NSLog(@"OK");
+         NSURL *fileURL = [openPanel URL]; //OpenDlg is my NSOpenPanel
+         NSLog(@"filePath: %@", [fileURL path]);
+         NSError* err;
+         NSFileManager* Filemanager = [NSFileManager defaultManager];
+         NSArray *contentsAtPath = [Filemanager contentsOfDirectoryAtURL:fileURL
+                    includingPropertiesForKeys:[NSArray arrayWithObject:NSURLNameKey]
+                                       options:NSDirectoryEnumerationSkipsHiddenFiles
+                                         error:&err];
+
+         
+         //NSArray *contentsAtPath = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[fileURL path] error:NULL];
+         
+         if (contentsAtPath)
+         {	// We don't deal with the error
+            NSMutableArray* archivOrdner = [[NSMutableArray alloc]initWithCapacity:0];
+            for (NSURL *fileURL in contentsAtPath)
+            {
+               
+               BOOL isDir;
+               if([Filemanager fileExistsAtPath:[fileURL path] isDirectory:&isDir] && isDir)
+               {
+                  //NSLog(@"Is directory: %@",[fileURL path]);
+                  if ([[fileURL path] rangeOfString:@"archiv" options:NSCaseInsensitiveSearch].length)
+                  {
+                  [archivOrdner addObject:[fileURL path]];
+               
+                  }
+               
+               }
+            }
+            //NSLog(@"archivOrdner: %@",archivOrdner);
+            if ([archivOrdner count])
+            {
+               for (NSString* archivName in archivOrdner)
+               {
+                  NSURL* tempurl =[NSURL fileURLWithPath:archivName];
+                  NSArray *filmsAtPath = [Filemanager contentsOfDirectoryAtURL:tempurl
+                                                       includingPropertiesForKeys:[NSArray arrayWithObject:NSURLNameKey]
+                                                                          options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                            error:&err];
+                  //NSLog(@"filmsAtPath: %@",filmsAtPath);
+                  for (NSURL* filmURL in filmsAtPath)
+                  {
+                     [filmOrdner addObject:[filmURL path]];
+                   }
+                  
+               }
+            }
+         }
+         NSLog(@"filmOrdner: %@",filmOrdner);
+         NSString* ArchivPfad = [[NSHomeDirectory() stringByAppendingPathComponent:@"Documents"]stringByAppendingPathComponent:@"WDTVDaten/Archiv_WDTV.txt"];
+         int erfolg = [filmOrdner writeToFile:ArchivPfad atomically:YES];
+         NSLog(@"ArchivPfad: %@ erfolg: %d",ArchivPfad,erfolg );
+
+      }
+      else
+      {
+         //[openPanel close];
+      }
+   }];
+}
+
+- (IBAction)reportDouble:(id)sender
+{
+   NSLog(@"reportDouble");
+   self.suchfeld.stringValue = @"";
+   [filmArray removeAllObjects];
+   NSArray* sammelOrdner = [self FilmSammlung];
+   NSMutableArray* doppelOrdner = [[NSMutableArray alloc]initWithCapacity:0];
+   for (NSString* archivfilm in archivArray)
+   {
+      //NSLog(@"archivfilm: %@",[archivfilm lastPathComponent]);
+      if ([sammelOrdner containsObject:[archivfilm lastPathComponent]])
+      {
+         [doppelOrdner addObject:archivfilm];
+         NSMutableDictionary* doppelDic = [NSMutableDictionary dictionaryWithObjectsAndKeys:[archivfilm lastPathComponent],@"titel",archivfilm, @"url", [NSNumber numberWithInt:0], @"mark",[NSNumber numberWithInt:1], @"playok", nil];
+         [filmArray addObject:doppelDic];
+
+      }
+   }
+   NSLog(@"reportDouble doppelOrdner: %@ ",doppelOrdner);
+   if ([doppelOrdner count]==0)
+   {
+      NSMutableDictionary* doppelDic = [NSMutableDictionary dictionaryWithObjectsAndKeys:@"Keine doppelten Filme gefunden",@"titel",@"", @"url", [NSNumber numberWithInt:0], @"mark",[NSNumber numberWithInt:0], @"playok", nil];
+      [filmArray addObject:doppelDic];
+
+   }
+   [filmTable reloadData];
+   NSLog(@"reportDouble doppelOrdner: %@ ",doppelOrdner);
+}
+
+- (id)rootItemForBrowser:(NSBrowser *)browser
+{
+   if (rootNode == nil)
+   {
+      rootNode = [[FileSystemNode alloc] initWithURL:[NSURL fileURLWithPath:@"/Volumes/WD_TV"]];
+   }
+   return rootNode;
+}
+
+
+- (NSInteger)browser:(NSBrowser *)browser numberOfChildrenOfItem:(id)item
+{
+   
+   FileSystemNode *node = (FileSystemNode *)item;
+   //NSLog(@"numberOfChildrenOfItem: %ld",node.children.count);
+   return node.children.count;
+}
+
+- (id)browser:(NSBrowser *)browser child:(NSInteger)index ofItem:(id)item
+{
+   FileSystemNode *node = (FileSystemNode *)item;
+   return [node.children objectAtIndex:index];
+}
+
+- (BOOL)browser:(NSBrowser *)browser isLeafItem:(id)item
+{
+   FileSystemNode *node = (FileSystemNode *)item;
+   return !node.isDirectory;
+}
+
+- (id)browser:(NSBrowser *)browser objectValueForItem:(id)item
+{
+   
+   FileSystemNode *node = (FileSystemNode *)item;
+   //NSLog(@"objectValueForItem: %@",node.displayName);
+   
+    NSRange r = [node.displayName rangeOfString:@"couldn’t" options:NSCaseInsensitiveSearch];
+   
+   //if ([node.displayName rangeOfString:@"couldn’t" options:NSCaseInsensitiveSearch].location)
+   if (r.length && r.length < NSNotFound)
+   {
+      NSLog(@"objectValueForItem kill loc: %ld",r.length);
+      //return NULL;
+   }
+   
+   return node.displayName;
+}
+
+/*
+- (void)browser:(NSBrowser *)sender willDisplayCell:(id)cell
+          atRow:(NSInteger)row column:(NSInteger)column
+{
+   //NSLog(@"willDisplayCell row: %ld col: %ld",row,column );
+}
+*/
+
+// Returns the directory the application uses to store the Core Data store file. This code uses a directory named "RH.WDTV" in the user's Application Support directory.
+- (NSURL *)applicationFilesDirectory
+{
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSURL *appSupportURL = [[fileManager URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask] lastObject];
+    return [appSupportURL URLByAppendingPathComponent:@"RH.WDTV"];
+}
+
+
+
+// Creates if necessary and returns the managed object model for the application.
+- (NSManagedObjectModel *)managedObjectModel
+{
+    if (_managedObjectModel)
+    {
+        return _managedObjectModel;
+    }
+	
+    NSURL *modelURL = [[NSBundle mainBundle] URLForResource:@"WDTV" withExtension:@"momd"];
+    _managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
+    return _managedObjectModel;
+}
+
+// Returns the persistent store coordinator for the application. This implementation creates and return a coordinator, having added the store for the application to it. (The directory for the store is created, if necessary.)
+- (NSPersistentStoreCoordinator *)persistentStoreCoordinator
+{
+    if (_persistentStoreCoordinator) {
+        return _persistentStoreCoordinator;
+    }
+    
+    NSManagedObjectModel *mom = [self managedObjectModel];
+    if (!mom) {
+        NSLog(@"%@:%@ No model to generate a store from", [self class], NSStringFromSelector(_cmd));
+        return nil;
+    }
+    
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSURL *applicationFilesDirectory = [self applicationFilesDirectory];
+    NSError *error = nil;
+    
+    NSDictionary *properties = [applicationFilesDirectory resourceValuesForKeys:@[NSURLIsDirectoryKey] error:&error];
+    
+    if (!properties) {
+        BOOL ok = NO;
+        if ([error code] == NSFileReadNoSuchFileError) {
+            ok = [fileManager createDirectoryAtPath:[applicationFilesDirectory path] withIntermediateDirectories:YES attributes:nil error:&error];
+        }
+        if (!ok) {
+            [[NSApplication sharedApplication] presentError:error];
+            return nil;
+        }
+    } else {
+        if (![properties[NSURLIsDirectoryKey] boolValue]) {
+            // Customize and localize this error.
+            NSString *failureDescription = [NSString stringWithFormat:@"Expected a folder to store application data, found a file (%@).", [applicationFilesDirectory path]];
+            
+            NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+            [dict setValue:failureDescription forKey:NSLocalizedDescriptionKey];
+            error = [NSError errorWithDomain:@"YOUR_ERROR_DOMAIN" code:101 userInfo:dict];
+            
+            [[NSApplication sharedApplication] presentError:error];
+            return nil;
+        }
+    }
+    
+    NSURL *url = [applicationFilesDirectory URLByAppendingPathComponent:@"WDTV.storedata"];
+    NSPersistentStoreCoordinator *coordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mom];
+    if (![coordinator addPersistentStoreWithType:NSXMLStoreType configuration:nil URL:url options:nil error:&error]) {
+        [[NSApplication sharedApplication] presentError:error];
+        return nil;
+    }
+    _persistentStoreCoordinator = coordinator;
+    
+    return _persistentStoreCoordinator;
+}
+
+// Returns the managed object context for the application (which is already bound to the persistent store coordinator for the application.) 
+- (NSManagedObjectContext *)managedObjectContext
+{
+    if (_managedObjectContext) {
+        return _managedObjectContext;
+    }
+    
+    NSPersistentStoreCoordinator *coordinator = [self persistentStoreCoordinator];
+    if (!coordinator) {
+        NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+        [dict setValue:@"Failed to initialize the store" forKey:NSLocalizedDescriptionKey];
+        [dict setValue:@"There was an error building up the data file." forKey:NSLocalizedFailureReasonErrorKey];
+        NSError *error = [NSError errorWithDomain:@"YOUR_ERROR_DOMAIN" code:9999 userInfo:dict];
+        [[NSApplication sharedApplication] presentError:error];
+        return nil;
+    }
+    _managedObjectContext = [[NSManagedObjectContext alloc] init];
+    [_managedObjectContext setPersistentStoreCoordinator:coordinator];
+
+    return _managedObjectContext;
+}
+
+// Returns the NSUndoManager for the application. In this case, the manager returned is that of the managed object context for the application.
+- (NSUndoManager *)windowWillReturnUndoManager:(NSWindow *)window
+{
+    return [[self managedObjectContext] undoManager];
+}
+
+// Performs the save action for the application, which is to send the save: message to the application's managed object context. Any encountered errors are presented to the user.
+- (IBAction)saveAction:(id)sender
+{
+    NSError *error = nil;
+    
+    if (![[self managedObjectContext] commitEditing]) {
+        NSLog(@"%@:%@ unable to commit editing before saving", [self class], NSStringFromSelector(_cmd));
+    }
+    
+    if (![[self managedObjectContext] save:&error]) {
+        [[NSApplication sharedApplication] presentError:error];
+    }
+}
+
+- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender
+{
+    // Save changes in the application's managed object context before the application terminates.
+    
+    if (!_managedObjectContext) {
+        return NSTerminateNow;
+    }
+    
+    if (![[self managedObjectContext] commitEditing]) {
+        NSLog(@"%@:%@ unable to commit editing to terminate", [self class], NSStringFromSelector(_cmd));
+        return NSTerminateCancel;
+    }
+    
+    if (![[self managedObjectContext] hasChanges]) {
+        return NSTerminateNow;
+    }
+    
+    NSError *error = nil;
+    if (![[self managedObjectContext] save:&error]) {
+
+        // Customize this code block to include application-specific recovery steps.              
+        BOOL result = [sender presentError:error];
+        if (result) {
+            return NSTerminateCancel;
+        }
+
+        NSString *question = NSLocalizedString(@"Could not save changes while quitting. Quit anyway?", @"Quit without saves error question message");
+        NSString *info = NSLocalizedString(@"Quitting now will lose any changes you have made since the last successful save", @"Quit without saves error question info");
+        NSString *quitButton = NSLocalizedString(@"Quit anyway", @"Quit anyway button title");
+        NSString *cancelButton = NSLocalizedString(@"Cancel", @"Cancel button title");
+        NSAlert *alert = [[NSAlert alloc] init];
+        [alert setMessageText:question];
+        [alert setInformativeText:info];
+        [alert addButtonWithTitle:quitButton];
+        [alert addButtonWithTitle:cancelButton];
+
+        NSInteger answer = [alert runModal];
+        
+        if (answer == NSAlertAlternateReturn) {
+            return NSTerminateCancel;
+        }
+    }
+
+    return NSTerminateNow;
+}
+
+- (long)numberOfRowsInTableView:(NSTableView *)tableView
+{
+   //NSLog(@"numberOfRowsInTableView: %ld",(unsigned long)[filmArray count]);
+   return [filmArray count];
+}
+
+- (id)tableView:(NSTableView *)tableView
+objectValueForTableColumn:(NSTableColumn *)tableColumn
+            row:(long)row
+{
+   
+   if ([[tableColumn identifier] isEqual: @"play"])
+   {
+      //NSLog(@"row: %ld playok : %@",row,[[filmArray objectAtIndex:row]objectForKey:@"playok"]);
+      
+      int playok = [[[filmArray objectAtIndex:row]objectForKey:@"playok"]intValue];
+      
+      
+      [[tableColumn dataCellForRow:row]setEnabled:playok];
+   }
+
+   return [[filmArray objectAtIndex:row]objectForKey:[tableColumn identifier]];
+}
+
+- (void)tableView:(NSTableView *)tableView setObjectValue:(id)anObject forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
+{
+   
+   if ([[tableColumn identifier] isEqual: @"mark"])
+   {
+      NSMutableDictionary* markdic = (NSMutableDictionary* )[filmArray objectAtIndex:row];
+      BOOL mark = [[markdic objectForKey:@"mark"]boolValue];
+      [markdic setObject:[NSNumber numberWithBool:!mark]forKey:@"mark"];
+      
+      //[[filmArray objectAtIndex:row]setObject:[NSNumber numberWithInt:1]forKey:@"mark"];
+   }
+   if ([[tableColumn identifier] isEqual: @"play"])
+   {
+      int playok = [[[filmArray objectAtIndex:row]objectForKey:@"playok"]intValue];
+      [[tableColumn dataCellForRow:row]setEnabled:playok];
+      //NSLog(@"playok: %d",playok);
+      //NSMutableDictionary* playdic = (NSMutableDictionary* )[filmArray objectAtIndex:row];
+      if (playok)
+      {
+      NSString* playPfad = [[filmArray objectAtIndex:row]objectForKey:@"url"];
+         
+      NSLog(@"playPfad: %@",playPfad);
+      }
+      else
+      {
+         NSString* playPfad = [NSString string];
+      
+      }
+   }
+}
+
+- (void)tableViewSelectionDidChange:(NSNotification *)note
+{
+   //NSLog(@"tableViewSelectionDidChange %d",[[note object]selectedRow]);
+   {
+      [[note object]selectedRow];
+   }
+   // [[note object] scrollRowToVisible:[[note object]selectedRow]];
+}
+
+- (void)controlTextDidChange:(NSNotification *)notification {
+   NSTextField *textField = [notification object];
+   //NSLog(@"controlTextDidChange: stringValue == %@", [textField stringValue]);
+   self.suchentaste.enabled = [[textField stringValue]length];
+    [[self window] setDefaultButtonCell:[self.suchentaste cell]];
+}
+
+
+- (void) FensterSchliessenAktion:(NSNotification*)note
+{
+   //NSLog(@"FensterSchliessenAktion");
+   [NSApp terminate:self];
+}
+
+
+@end
