@@ -180,12 +180,11 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
  
    //self.Archiv_Pfad = [NSString stringWithFormat:@" /Documents/WDTVDaten/Archiv_WDTV.txt",NSHomeDirectory()];
  self.Archiv_Pfad = [NSString stringWithFormat:@"%@/Documents/WDTVDaten/Archiv_WDTV.txt",NSHomeDirectory()];
-   NSLog(@"self.Archiv_Pfad: %@",self.Archiv_Pfad);
+   //NSLog(@"self.Archiv_Pfad: %@",self.Archiv_Pfad);
    NSURL* Archiv_URL=[NSURL fileURLWithPath:self.Archiv_Pfad];
    if ([Filemanager fileExistsAtPath:self.Archiv_Pfad])//ist
    {
       NSError* err;
-      //NSArray* ArchivOrdnerArray = [Filemanager contentsOfDirectoryAtPath:self.Archiv_Pfad error:&err];
       //NSLog(@"err: %@ ArchivOrdnerArray: %@",err,[ArchivOrdnerArray description]);
       NSArray* OrdnerArray=  [NSArray arrayWithContentsOfURL:Archiv_URL];
       //NSLog(@"OrdnerArray: %@",[OrdnerArray description]);
@@ -209,8 +208,34 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
 
 }
 
+- (NSArray*)FilmArchiv
+{
+   NSFileManager *Filemanager=[NSFileManager defaultManager];
+   NSMutableArray* temparchivArray = [[NSMutableArray alloc]initWithCapacity:0];
+
+   self.Archiv_Pfad = [NSString stringWithFormat:@"%@/Documents/WDTVDaten/Archiv_WDTV.txt",NSHomeDirectory()];
+   //NSLog(@"self.Archiv_Pfad: %@",self.Archiv_Pfad);
+   NSURL* Archiv_URL=[NSURL fileURLWithPath:self.Archiv_Pfad];
+   if ([Filemanager fileExistsAtPath:self.Archiv_Pfad])//ist
+   {
+      NSError* err;
+      //NSLog(@"err: %@ ArchivOrdnerArray: %@",err,[ArchivOrdnerArray description]);
+      NSArray* OrdnerArray=  [NSArray arrayWithContentsOfURL:Archiv_URL];
+      //NSLog(@"OrdnerArray: %@",[OrdnerArray description]);
+      
+      for (NSString* tempurl in OrdnerArray)
+      {
+         //NSLog(@"tempurl: %@",[tempurl  lastPathComponent]);
+         [temparchivArray addObject:tempurl];
+      }
+      //NSLog(@"archivArray: %@",[archivArray description]);
+   }
+   return temparchivArray;
+}
+
 - (NSArray*)FilmSammlung
 {
+   // Alle Filme auf WDTV
    NSMutableArray* sammlungArray = [[NSMutableArray alloc]initWithCapacity:0];
    NSFileManager *Filemanager=[NSFileManager defaultManager];
    NSError* err=NULL;
@@ -276,12 +301,18 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
 {
    [filmArray removeAllObjects];
    [filmTable reloadData];
-   self.resultatfeld.stringValue =@"";
+   self.resultatfeld.stringValue =@"suchen ...";
    
    self.opentaste.enabled = NO;
    self.magtaste.enabled = NO;
    self.deletetaste.enabled = NO;
    self.archivtaste.enabled = NO;
+   
+   
+   NSMutableDictionary* findDic = [NSMutableDictionary dictionaryWithObjectsAndKeys:@"suchen ...", @"titel",@"",@"url",[NSNumber numberWithInt:0], @"mark",[NSNumber numberWithInt:1], @"playok", nil];
+   [filmArray addObject:findDic];
+   [filmTable reloadData];
+
 
    NSString* suchstring = [self.suchfeld stringValue];
    //NSLog(@"reportSuchen: %@ WDTV_Pfad: %@",[self.suchfeld stringValue],self.WDTV_Pfad);
@@ -294,7 +325,7 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    NSError* err=NULL;
    NSString* archivVolumePfad = @"/Volumes/RH 1TB";
    BOOL archivda = [Filemanager fileExistsAtPath:archivVolumePfad];
-   NSLog(@"archivda: %d",archivda);
+   //NSLog(@"archivda: %d",archivda);
    // Archiv durchsuchen
    for (NSString* temppfad in archivArray)
    {
@@ -415,6 +446,11 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
       [filmArray addObject:findDic];
       [filmTable reloadData];
       
+   }
+   else
+   {
+      [filmArray removeObjectAtIndex:0];
+   
    }
    [filmTable reloadData];
 
@@ -553,7 +589,7 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    NSLog(@"reportDeleteVonTable: selektierteZeile: %ld",selektierteZeile);
    NSString* selektierterPfad = [[filmArray objectAtIndex:selektierteZeile ]objectForKey:@"url"];
    
-   NSLog(@"reportMagVonTable selektierterPfad: *%@*", selektierterPfad);
+   //NSLog(@"reportMagVonTable selektierterPfad: *%@*", selektierterPfad);
    
    NSString* moveLink = [[[selektierterPfad stringByDeletingLastPathComponent]stringByDeletingLastPathComponent]stringByAppendingPathComponent:@"mag"];
    
@@ -576,7 +612,7 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
       [filmArray removeObjectAtIndex:selektierteZeile];
       [filmTable reloadData];
       
-      [[self.tvbrowser parentForItemsInColumn:1]invalidateChildren];
+      [[self.tvbrowser parentForItemsInColumn:[self.tvbrowser lastColumn]]invalidateChildren];
       [self.tvbrowser loadColumnZero];
    }
       else
@@ -631,10 +667,10 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    //NSLog(@"reportDeleteVonTable: selektierteZeile: %ld",selektierteZeile);
    NSString* selektierterPfad = [[filmArray objectAtIndex:selektierteZeile ]objectForKey:@"url"];
    
-   NSLog(@"reportMagVonTable selektierterPfad: %@", selektierterPfad);
+   //NSLog(@"reportDEleteVonTable selektierterPfad: %@", selektierterPfad);
    
    int erfolg = [Filemanager removeItemAtPath:selektierterPfad error:&err];
-   NSLog(@"delete err: %@",[err description]);
+   //NSLog(@"delete err: %@",[err description]);
    if (erfolg)
    {
       NSLog(@"delete OK");
@@ -649,7 +685,7 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
          // OK clicked, delete the record
          [filmArray removeObjectAtIndex:selektierteZeile];
          [filmTable reloadData];
-         [[self.tvbrowser parentForItemsInColumn:1]invalidateChildren];
+         [[self.tvbrowser parentForItemsInColumn:[self.tvbrowser lastColumn]]invalidateChildren];
          [self.tvbrowser loadColumnZero];
 
 
@@ -757,7 +793,7 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
                
                }
             }
-            //NSLog(@"archivOrdner: %@",archivOrdner);
+            NSLog(@"archivOrdner: %@",archivOrdner);
             if ([archivOrdner count])
             {
                for (NSString* archivName in archivOrdner)
@@ -768,9 +804,9 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
                                                                           options:NSDirectoryEnumerationSkipsHiddenFiles
                                                                             error:&err];
                   //NSLog(@"filmsAtPath: %@",filmsAtPath);
-                  for (NSURL* filmURL in filmsAtPath)
+                  for (NSURL* film in filmsAtPath)
                   {
-                     [filmOrdner addObject:[filmURL path]];
+                     [filmOrdner addObject:[film path]];
                    }
                   
                }
@@ -791,14 +827,15 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
 
 - (IBAction)reportDouble:(id)sender
 {
-   NSLog(@"reportDouble");
+   //NSLog(@"reportDouble");
+   [archivArray setArray:[self FilmArchiv]];
    //NSLog(@"reportDouble archivArray: %@ ",archivArray);
    self.suchfeld.stringValue = @"";
    [filmArray removeAllObjects];
-   NSArray* sammelOrdner = [self FilmSammlung]; // Filme auf WDTV
+   NSArray* sammelOrdner = [self FilmSammlung]; // alle Filme auf WDTV
    NSMutableArray* doppelOrdner = [[NSMutableArray alloc]initWithCapacity:0];
    NSMutableArray* titelArray = [[NSMutableArray alloc]initWithCapacity:0];
-  NSError *error = NULL;
+   NSError *error = NULL;
    NSRegularExpression *zifferregex = [NSRegularExpression regularExpressionWithPattern:@"[0-9]+"
                                                                                 options:NSRegularExpressionCaseInsensitive
                                                                                   error:&error];
@@ -811,7 +848,7 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
 
    
    
-   for (NSString* archivfilm in archivArray)
+   for (NSString* archivfilm in archivArray) // Inhalt des Files Archiv_WDTV.txt auf Dokumente/WDTVDaten
    {
          //NSLog(@"archivfilm: %@",[archivfilm lastPathComponent]);
          NSString* suchFilmtitel = [[archivfilm lastPathComponent]stringByDeletingPathExtension];
@@ -842,7 +879,7 @@ void mountVolumeAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
          
    }
    
-   NSLog(@"reportDouble titelArray: %@ ",titelArray);
+   //NSLog(@"reportDouble titelArray aus WDTV.txt: %@ ",titelArray);
    
    for (NSString* archivfilm in sammelOrdner) // Filme auf WDTV
    {

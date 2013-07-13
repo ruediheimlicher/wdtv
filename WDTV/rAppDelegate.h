@@ -56,4 +56,5 @@
 - (IBAction)reportDouble:(id)sender;
 - (IBAction)reportDeleteVonTable:(id)sender;
 - (NSArray*)FilmSammlung;
+- (NSArray*)FilmArchiv;
 @end
