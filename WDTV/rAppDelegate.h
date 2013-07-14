@@ -15,6 +15,7 @@
    FileSystemNode *rootNode;
    NSMutableArray* filmArray;
    NSMutableArray * archivArray;
+   NSMutableArray * kellerArray;
    
    IBOutlet NSTableView* filmTable;
    NSString* filmLink;
@@ -44,6 +45,8 @@
 
 @property NSString * Archiv_Pfad;
 
+@property NSString * Keller_Pfad;
+
 
 
 - (IBAction)saveAction:(id)sender;
@@ -52,9 +55,11 @@
 - (IBAction)reportOpen:(id)sender;
 - (IBAction)reportMag:(id)sender;
 - (IBAction)reportDelete:(id)sender;
-- (IBAction)reportArchivAktualisieren:(id)sender;
+- (IBAction)reportMagazinAktualisieren:(id)sender;
+- (IBAction)reportKellerAktualisieren:(id)sender;
 - (IBAction)reportDouble:(id)sender;
 - (IBAction)reportDeleteVonTable:(id)sender;
 - (NSArray*)FilmSammlung;
 - (NSArray*)FilmArchiv;
+- (NSArray*)FilmKeller;
 @end
