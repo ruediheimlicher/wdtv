@@ -16,6 +16,7 @@
    NSMutableArray* filmArray;
    NSMutableArray * archivArray;
    NSMutableArray * kellerArray;
+   NSMutableArray * externArray;
    
    IBOutlet NSTableView* filmTable;
    NSString* filmLink;
@@ -62,4 +63,6 @@
 - (NSArray*)FilmSammlung;
 - (NSArray*)FilmArchiv;
 - (NSArray*)FilmKeller;
+- (NSArray*)FilmExtern;
+- (NSArray*)FilmeAnPfad:(NSString*)pfad;
 @end
