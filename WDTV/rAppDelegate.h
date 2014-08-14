@@ -17,6 +17,7 @@
    NSMutableArray * archivArray;
    NSMutableArray * kellerArray;
    NSMutableArray * externArray;
+   NSMutableArray * filmarchivArray;
    
    IBOutlet NSTableView* filmTable;
    NSString* filmLink;
@@ -48,7 +49,7 @@
 
 @property NSString * Keller_Pfad;
 
-
+@property NSString * Machine_Pfad;
 
 - (IBAction)saveAction:(id)sender;
 

@@ -132,6 +132,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    archivArray = [[NSMutableArray alloc]initWithCapacity:0];
    kellerArray = [[NSMutableArray alloc]initWithCapacity:0];
    externArray = [[NSMutableArray alloc]initWithCapacity:0];
+   filmarchivArray = [[NSMutableArray alloc]initWithCapacity:0];
 
    
    [self.tvbrowser setTarget:self];
@@ -196,6 +197,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    self.WDTV_Pfad = [NSString stringWithFormat:@"/Volumes/WD_TV"];
    //NSLog(@"WDTV_Pfad: %@",self.WDTV_Pfad);
    
+   
    NSURL* WDTV_URL=[NSURL fileURLWithPath:self.WDTV_Pfad];
    NSFileManager *Filemanager=[NSFileManager defaultManager];
    NSError* err=NULL;
@@ -256,7 +258,14 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    
    NSLog(@"externarray: %@",externarray);
 
+   NSString* filmarchivPfad = [NSString stringWithFormat:@"/Volumes/TRH\ 2T\ Filmarchiv"];
+   NSLog(@"filmarchivPfad: %@",filmarchivPfad);
    
+   NSArray* filmarchivarray = (NSMutableArray*)[self FilmeAnPfad:filmarchivPfad];
+   
+   NSLog(@"filmarchivarray: %@",filmarchivarray);
+   
+  
    
    NSNotificationCenter * nc;
 	nc=[NSNotificationCenter defaultCenter];
