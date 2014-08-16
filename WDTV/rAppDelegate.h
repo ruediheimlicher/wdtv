@@ -13,9 +13,11 @@
 @interface rAppDelegate : NSObject <NSApplicationDelegate, NSBrowserDelegate, NSTableViewDataSource, NSTableViewDelegate, NSTextFieldDelegate>
 {
    FileSystemNode *rootNode;
-   NSMutableArray* filmArray;
-   NSMutableArray * archivArray;
-   NSMutableArray * kellerArray;
+   NSMutableArray* filmArray; // Data Source fuer TableView FilmTable
+   
+   // Arrays fuer Filmsammlungen
+   NSMutableArray * wdtvArray;
+   NSMutableArray * magArray;
    NSMutableArray * externArray;
    NSMutableArray * filmarchivArray;
    
@@ -29,11 +31,18 @@
 @property (assign) IBOutlet  NSButton* deletetaste;
 @property (assign) IBOutlet  NSButton* opentaste;
 @property (assign) IBOutlet  NSButton* magtaste;
+@property (assign) IBOutlet  NSButton* playtaste;
+
 @property (assign) IBOutlet  NSButton* archivtaste;
+@property (assign) IBOutlet  NSButton* openexterntaste;
 
 @property (assign) IBOutlet  NSTextField* suchfeld;
 @property (assign) IBOutlet  NSTextField* resultatfeld;
 @property (assign) IBOutlet  NSTextField* linkfeld;
+
+@property (assign) IBOutlet  NSTextField* errorfeld;
+@property (assign) IBOutlet  NSTextField* hostnamefeld;
+
 
 
 
@@ -42,28 +51,46 @@
 @property (readonly, strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 
 @property NSIndexSet * clickset;
-@property NSString * WDTV_Pfad;
+@property NSString * WDTV_Pfad; // HD an WDTVLive
 @property NSArray * WDTV_Array;
 
-@property NSString * Archiv_Pfad;
+@property NSString * Mag_Pfad; // HD an TM
+@property NSArray * Mag_Array;
 
-@property NSString * Keller_Pfad;
+
+@property NSString * Filmarchiv_Pfad; // HD an mini
+@property NSArray * Filmarchiv_Array;
+
+@property NSString * extern_Pfad; // externe HD an mini, sofern da
+@property NSArray * Extern_Array;
+
+
 
 @property NSString * Machine_Pfad;
+@property NSString * Homedir_Pfad;
+@property NSString * Volumes_Pfad;
+@property NSString * Host_Name;
+
+
+
+
 
 - (IBAction)saveAction:(id)sender;
 
 - (IBAction)reportSuchen:(id)sender;
 - (IBAction)reportOpen:(id)sender;
 - (IBAction)reportMag:(id)sender;
+- (IBAction)reportBrowserMag:(id)sender;
+- (IBAction)reportBrowserPlay:(id)sender;
 - (IBAction)reportDelete:(id)sender;
 - (IBAction)reportMagazinAktualisieren:(id)sender;
 - (IBAction)reportKellerAktualisieren:(id)sender;
 - (IBAction)reportDouble:(id)sender;
 - (IBAction)reportDeleteVonTable:(id)sender;
-- (NSArray*)FilmSammlung;
+-(IBAction)reportOpenExtern:(id)sender;
+- (NSArray*)Film_WDTV;
 - (NSArray*)FilmArchiv;
-- (NSArray*)FilmKeller;
+- (NSArray*)FilmMag;
 - (NSArray*)FilmExtern;
 - (NSArray*)FilmeAnPfad:(NSString*)pfad;
 @end

@@ -78,61 +78,62 @@
 
 - (NSArray *)children
 {
-    if (_children == nil || _childrenDirty)
-    {
-        // This logic keeps the same pointers around, if possible.
-        NSMutableDictionary *newChildren = [NSMutableDictionary new];
-        
-        NSString *parentPath = [_url path];
-       //NSLog(@"children: parentPath: %@",parentPath);
-        NSArray *contentsAtPath = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:parentPath error:NULL];
-	
-	if (contentsAtPath)
-   {	// We don't deal with the error
-      for (NSString *filename in contentsAtPath)
-      {
-         if (!([filename characterAtIndex:0]=='.'))
+   if (_children == nil || _childrenDirty)
+   {
+      // This logic keeps the same pointers around, if possible.
+      NSMutableDictionary *newChildren = [NSMutableDictionary new];
+      
+      NSString *parentPath = [_url path];
+      //NSLog(@"children: parentPath: %@",parentPath);
+      NSArray *contentsAtPath = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:parentPath error:NULL];
+      
+      if (contentsAtPath)
+      {	// We don't deal with the error
+         for (NSString *filename in contentsAtPath)
          {
-             // Use the filename as a key and see if it was around and reuse it, if possible
-            
-            if (_children != nil)
+            if (!([filename characterAtIndex:0]=='.'))
             {
-               FileSystemNode *oldChild = [_children objectForKey:filename];
-               if (oldChild != nil)
+               // Use the filename as a key and see if it was around and reuse it, if possible
+               
+               if (_children != nil)
                {
-                  [newChildren setObject:oldChild forKey:filename];
-                  continue;
+                  FileSystemNode *oldChild = [_children objectForKey:filename];
+                  if (oldChild != nil)
+                  {
+                     [newChildren setObject:oldChild forKey:filename];
+                     continue;
+                  }
                }
-            }
-             
-            // We didn't find it, add a new one
-            NSString *fullPath = [parentPath stringByAppendingFormat:@"/%@", filename];
-            //NSLog(@"filename: %@ fullPath: %@",filename,fullPath);
-
-            NSURL *childURL = [NSURL fileURLWithPath:fullPath];
-            if (childURL != nil)
-            {
-               // Wrap the child url with our node
-               FileSystemNode *node = [[FileSystemNode alloc] initWithURL:childURL];
-               [newChildren setObject:node forKey:filename];
+               
+               // We didn't find it, add a new one
+               NSString *fullPath = [parentPath stringByAppendingFormat:@"/%@", filename];
+               //NSLog(@"filename: %@ fullPath: %@",filename,fullPath);
+               
+               NSURL *childURL = [NSURL fileURLWithPath:fullPath];
+               if (childURL != nil)
+               {
+                  // Wrap the child url with our node
+                  FileSystemNode *node = [[FileSystemNode alloc] initWithURL:childURL];
+                  //NSLog(@"filename: %@ fullPath: %@ childURL: %@",filename,fullPath,childURL);
+                  [newChildren setObject:node forKey:filename];
+               }
             }
          }
       }
-	}
-        _children = newChildren;
-        _childrenDirty = NO;
-    }
-    
-    NSArray *result = [_children allValues];
-    // Sort the children by the display name and return it
+      _children = newChildren;
+      _childrenDirty = NO;
+   }
+   
+   NSArray *result = [_children allValues];
+   // Sort the children by the display name and return it
    result = [result sortedArrayUsingComparator:^(id obj1, id obj2)
-   {
-        NSString *objName = [obj1 displayName];
-        NSString *obj2Name = [obj2 displayName];
-        NSComparisonResult result = [objName compare:obj2Name options:NSNumericSearch | NSCaseInsensitiveSearch | NSWidthInsensitiveSearch | NSForcedOrderingSearch range:NSMakeRange(0, [objName length]) locale:[NSLocale currentLocale]];
-        return result;
-    }];
-    return result;
+             {
+                NSString *objName = [obj1 displayName];
+                NSString *obj2Name = [obj2 displayName];
+                NSComparisonResult result = [objName compare:obj2Name options:NSNumericSearch | NSCaseInsensitiveSearch | NSWidthInsensitiveSearch | NSForcedOrderingSearch range:NSMakeRange(0, [objName length]) locale:[NSLocale currentLocale]];
+                return result;
+             }];
+   return result;
 }
 
 - (NSDictionary*)childrenDic
