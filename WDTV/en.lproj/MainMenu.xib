@@ -835,30 +835,8 @@
                             <action selector="reportDelete:" target="494" id="786"/>
                         </connections>
                     </button>
-                    <button verticalHuggingPriority="750" id="795">
-                        <rect key="frame" x="1108" y="539" width="152" height="32"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <buttonCell key="cell" type="push" title="Mag aktualisieren" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="796">
-                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="system"/>
-                        </buttonCell>
-                        <connections>
-                            <action selector="reportMagazinAktualisieren:" target="494" id="854"/>
-                        </connections>
-                    </button>
-                    <button verticalHuggingPriority="750" id="846">
-                        <rect key="frame" x="1103" y="511" width="161" height="32"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <buttonCell key="cell" type="push" title="Keller aktualisieren" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="847">
-                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="system"/>
-                        </buttonCell>
-                        <connections>
-                            <action selector="reportKellerAktualisieren:" target="494" id="853"/>
-                        </connections>
-                    </button>
                     <button verticalHuggingPriority="750" id="806">
-                        <rect key="frame" x="833" y="540" width="146" height="32"/>
+                        <rect key="frame" x="962" y="539" width="146" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="push" title="Doppelte suchen" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="807">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -888,33 +866,6 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <textField verticalHuggingPriority="750" id="849">
-                        <rect key="frame" x="1017" y="547" width="76" height="17"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Externe HD" id="850">
-                            <font key="font" metaFont="system"/>
-                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                        </textFieldCell>
-                    </textField>
-                    <textField verticalHuggingPriority="750" id="851">
-                        <rect key="frame" x="1017" y="520" width="79" height="17"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Mag auf TM" id="852">
-                            <font key="font" metaFont="system"/>
-                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                        </textFieldCell>
-                    </textField>
-                    <textField verticalHuggingPriority="750" id="qyl-eF-2Sc">
-                        <rect key="frame" x="1017" y="493" width="79" height="17"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Filmarchiv" id="CHf-5E-kiS">
-                            <font key="font" metaFont="system"/>
-                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                        </textFieldCell>
-                    </textField>
                     <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="LER-ke-vrq">
                         <rect key="frame" x="137" y="25" width="1030" height="62"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -925,9 +876,9 @@
                         </textFieldCell>
                     </textField>
                     <textField verticalHuggingPriority="750" id="uCe-e2-rjT">
-                        <rect key="frame" x="257" y="509" width="161" height="22"/>
+                        <rect key="frame" x="257" y="495" width="161" height="22"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="ksc-73-QLH">
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="center" drawsBackground="YES" id="ksc-73-QLH">
                             <font key="font" metaFont="system"/>
                             <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -953,6 +904,15 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="oqF-w2-JKd">
+                        <rect key="frame" x="210" y="497" width="41" height="17"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Name" id="nsF-Uu-5AE">
+                            <font key="font" metaFont="system"/>
+                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                        </textFieldCell>
+                    </textField>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="ggC-62-3lt">
                         <rect key="frame" x="17" y="300" width="104" height="17"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -971,6 +931,64 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="oEj-HK-vO6">
+                        <rect key="frame" x="756" y="556" width="97" height="21"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="center" title="Filmarchiv" drawsBackground="YES" id="Cio-CH-9x3">
+                            <font key="font" metaFont="cellTitle"/>
+                            <color key="textColor" red="0.98336190621655906" green="1" blue="0.93769733591651749" alpha="1" colorSpace="calibratedRGB"/>
+                            <color key="backgroundColor" red="0.76217964326110488" green="0.76811623086734693" blue="0.76177280416652871" alpha="1" colorSpace="calibratedRGB"/>
+                        </textFieldCell>
+                    </textField>
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="Hig-xn-Nc2">
+                        <rect key="frame" x="756" y="531" width="97" height="21"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="center" title="Mag auf TM" drawsBackground="YES" id="Yfi-D3-jWR">
+                            <font key="font" metaFont="cellTitle"/>
+                            <color key="textColor" red="0.98336190621655906" green="1" blue="0.93769733591651749" alpha="1" colorSpace="calibratedRGB"/>
+                            <color key="backgroundColor" red="0.76217964326110488" green="0.76811623086734693" blue="0.76177280416652871" alpha="1" colorSpace="calibratedRGB"/>
+                        </textFieldCell>
+                    </textField>
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="I61-ot-9xs">
+                        <rect key="frame" x="756" y="507" width="97" height="21"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="center" title="TV_HD" drawsBackground="YES" id="okO-sy-M0z">
+                            <font key="font" metaFont="cellTitle"/>
+                            <color key="textColor" red="0.98336190621655906" green="1" blue="0.93769733591651749" alpha="1" colorSpace="calibratedRGB"/>
+                            <color key="backgroundColor" red="0.76217964326110488" green="0.76811623086734693" blue="0.76177280416652871" alpha="1" colorSpace="calibratedRGB"/>
+                        </textFieldCell>
+                    </textField>
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="mwg-qH-coK">
+                        <rect key="frame" x="570" y="531" width="93" height="46"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="center" title="WDTV" drawsBackground="YES" id="Cyj-YB-XQN">
+                            <font key="font" metaFont="system" size="14"/>
+                            <color key="textColor" red="0.98336190619999997" green="1" blue="0.93769733590000004" alpha="1" colorSpace="calibratedRGB"/>
+                            <color key="backgroundColor" red="0.76217964329999999" green="0.76811623090000003" blue="0.76177280420000004" alpha="1" colorSpace="calibratedRGB"/>
+                        </textFieldCell>
+                    </textField>
+                    <progressIndicator horizontalHuggingPriority="750" verticalHuggingPriority="750" maxValue="100" bezeled="NO" indeterminate="YES" style="spinning" id="Y3i-9m-cLN">
+                        <rect key="frame" x="688" y="540" width="32" height="32"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    </progressIndicator>
+                    <textField verticalHuggingPriority="750" id="2KM-Ro-fXA">
+                        <rect key="frame" x="457" y="495" width="161" height="22"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="center" drawsBackground="YES" id="W4R-Hz-ZeG">
+                            <font key="font" metaFont="system"/>
+                            <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                        </textFieldCell>
+                    </textField>
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="PJj-bN-XKx">
+                        <rect key="frame" x="425" y="497" width="26" height="17"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="IP" id="0QI-0n-DoV">
+                            <font key="font" metaFont="system"/>
+                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                        </textFieldCell>
+                    </textField>
                 </subviews>
             </view>
         </window>
@@ -979,15 +997,21 @@
                 <outlet property="archivtaste" destination="820" id="832"/>
                 <outlet property="deletetaste" destination="774" id="783"/>
                 <outlet property="errorfeld" destination="LER-ke-vrq" id="xAT-yd-KuW"/>
+                <outlet property="extern_ok" destination="I61-ot-9xs" id="Qhj-Bt-omp"/>
                 <outlet property="filmTable" destination="703" id="718"/>
+                <outlet property="filmarchiv_ok" destination="oEj-HK-vO6" id="wiS-iX-Uqd"/>
                 <outlet property="hostnamefeld" destination="uCe-e2-rjT" id="5iT-Bg-zo4"/>
+                <outlet property="ipfeld" destination="2KM-Ro-fXA" id="UOE-9Z-G31"/>
                 <outlet property="linkfeld" destination="558" id="757"/>
+                <outlet property="mag_ok" destination="Hig-xn-Nc2" id="Dru-Sy-slY"/>
                 <outlet property="magtaste" destination="766" id="784"/>
                 <outlet property="openexterntaste" destination="zn7-bv-FJO" id="5Oj-w7-yfE"/>
                 <outlet property="playtaste" destination="758" id="Phb-12-wLm"/>
                 <outlet property="suchentaste" destination="536" id="637"/>
                 <outlet property="suchfeld" destination="540" id="580"/>
                 <outlet property="tvbrowser" destination="549" id="557"/>
+                <outlet property="warteschlaufe" destination="Y3i-9m-cLN" id="pTE-sN-88x"/>
+                <outlet property="wdtv_ok" destination="mwg-qH-coK" id="1vo-8b-vPs"/>
                 <outlet property="window" destination="371" id="532"/>
             </connections>
         </customObject>

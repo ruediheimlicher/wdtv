@@ -12,7 +12,8 @@
  
 @interface rAppDelegate : NSObject <NSApplicationDelegate, NSBrowserDelegate, NSTableViewDataSource, NSTableViewDelegate, NSTextFieldDelegate>
 {
-   FileSystemNode *rootNode;
+   FileSystemNode *rootNode;  // Data source für Browser
+   
    NSMutableArray* filmArray; // Data Source fuer TableView FilmTable
    
    // Arrays fuer Filmsammlungen
@@ -36,12 +37,20 @@
 @property (assign) IBOutlet  NSButton* archivtaste;
 @property (assign) IBOutlet  NSButton* openexterntaste;
 
+@property (assign) IBOutlet  NSTextField* mag_ok;
+@property (assign) IBOutlet  NSTextField* filmarchiv_ok;
+@property (assign) IBOutlet  NSTextField* wdtv_ok;
+@property (assign) IBOutlet  NSTextField* extern_ok;
+
 @property (assign) IBOutlet  NSTextField* suchfeld;
 @property (assign) IBOutlet  NSTextField* resultatfeld;
 @property (assign) IBOutlet  NSTextField* linkfeld;
 
 @property (assign) IBOutlet  NSTextField* errorfeld;
 @property (assign) IBOutlet  NSTextField* hostnamefeld;
+@property (assign) IBOutlet  NSTextField* ipfeld;
+
+@property (assign) IBOutlet  NSProgressIndicator* warteschlaufe;
 
 
 
@@ -54,15 +63,18 @@
 @property NSString * WDTV_Pfad; // HD an WDTVLive
 @property NSArray * WDTV_Array;
 
+@property NSString* rootNodePath;
 @property NSString * Mag_Pfad; // HD an TM
 @property NSArray * Mag_Array;
-
+@property NSNumber * Mag_OK; // Mag an TM ist da
 
 @property NSString * Filmarchiv_Pfad; // HD an mini
 @property NSArray * Filmarchiv_Array;
+@property NSNumber * Filmarchiv_OK; // Filmarchiv an mini ist da
 
 @property NSString * extern_Pfad; // externe HD an mini, sofern da
-@property NSArray * Extern_Array;
+@property NSArray * extern_Array;
+@property NSNumber * extern_OK; // externe HD ist da
 
 
 

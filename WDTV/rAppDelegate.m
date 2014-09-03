@@ -8,6 +8,14 @@
 
 #import "rAppDelegate.h"
 #import "FileSystemNode.h"
+#import <Foundation/Foundation.h>
+#import <CoreWLAN/CoreWLAN.h>
+#include <ifaddrs.h>
+
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#import <SystemConfiguration/SCNetworkConfiguration.h>
+
 #include <unistd.h>
 
 @implementation rAppDelegate
@@ -130,6 +138,8 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
    
+   [self.warteschlaufe setHidden:NO];
+   [self.warteschlaufe startAnimation:NULL];
    self.Homedir_Pfad = NSHomeDirectory();
    //NSLog(@"Homedir_Pfad: %@",self.Homedir_Pfad);
    /*
@@ -155,6 +165,50 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    //NSLog(@"Host_Name: %@",self.Host_Name);
    
    self.hostnamefeld.stringValue = self.Host_Name;
+ 
+
+   // you may need to include other headers
+   /*
+    struct ifaddrs {
+    struct ifaddrs  *ifa_next;
+    char		*ifa_name;
+    unsigned int	 ifa_flags;
+    struct sockaddr	*ifa_addr;
+    struct sockaddr	*ifa_netmask;
+    struct sockaddr	*ifa_dstaddr;
+    void		*ifa_data;
+    };
+
+    */
+   struct ifaddrs* interfaces = NULL;
+   struct ifaddrs* temp_addr = NULL;
+   
+   // retrieve the current interfaces - returns 0 on success
+   NSInteger success = getifaddrs(&interfaces);
+   if (success == 0)
+   {
+      // Loop through linked list of interfaces
+      temp_addr = interfaces;
+      while (temp_addr != NULL)
+      {
+         if (temp_addr->ifa_addr->sa_family == AF_INET) // internetwork only
+         {
+          if (strcmp(temp_addr->ifa_name ,"fw0")==0)
+            {
+            NSString* name = [NSString stringWithUTF8String:temp_addr->ifa_name];
+            NSString* address = [NSString stringWithUTF8String:inet_ntoa(((struct sockaddr_in *)temp_addr->ifa_addr)->sin_addr)];
+            NSLog(@"interface name: %@ address: %@", name,address);
+               self.ipfeld.stringValue = address;
+            }
+         }
+         
+         temp_addr = temp_addr->ifa_next;
+      }
+   }
+   
+   // Free memory
+   
+
    
    
    filmArray = [[NSMutableArray alloc]initWithCapacity:0]; // DataSource  von TableView FilmTable
@@ -167,6 +221,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    
    //
    [self.tvbrowser setTarget:self];
+   [self.tvbrowser setColumnResizingType:NSBrowserUserColumnResizing];
    //[self.self.tvbrowser setReusesColumns:NO];
    //[self.tvbrowser setWidth:100 ofColumn:0];
    [self.tvbrowser sizeToFit];
@@ -178,7 +233,11 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    
    [self.tvbrowser  setDoubleAction:@selector(browserCellSelected:)];
    [self.tvbrowser  setAction:@selector(browserClick:)];
- 
+   
+ //  [[self.tvbrowser matrixInColumn:1] sizeToCells];
+   
+   //[self.tvbrowser setWidth:[self.tvbrowser columnWidthForColumnContentWidth:100] ofColumn:1];
+   //[self.tvbrowser setWidth:[self.tvbrowser columnWidthForColumnContentWidth:100] ofColumn:0];
    
    // TableView
    [filmTable setDelegate:self];
@@ -217,24 +276,34 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    [movecell setTarget:self];
    [movecell setTitle:@">mag"];
    [[filmTable tableColumnWithIdentifier:@"mag"]setDataCell:movecell];
-
    
-   
-   
+   self.rootNodePath = @"/Volumes/WD_TV";
    if ([_Host_Name isEqualToString:@"ruediheimlicher.local"])
        {
           self.Filmarchiv_Pfad = @"/Volumes/Magazin_HD/Filmarchiv";
+          
        }
    else if ([_Host_Name isEqualToString:@"minihome.local"])
    {
       self.Filmarchiv_Pfad = @"/Volumes/Film_HD/Filmarchiv";
    }
+   else if ([_Host_Name isEqualToString:@"ruediheimlicher.home"]) // auswaerts mit MBP
+   {
+      self.rootNodePath = @"/Volumes/TV_HD";
+      //self.Filmarchiv_Pfad = @"/Volumes/Film_HD/Filmarchiv";
    
+   }
+
+   else
+   {
+      self.Filmarchiv_Pfad=nil;
+   }
+   NSLog(@"rootnode: %@",self.rootNodePath);
    // *************************************************
    // Daten auf WDTVLIVE lesen
    // *************************************************
 
-   mountVolumeAppleScript(@"ruediheimlicher",@"rh47",@"WDTVLIVE",@"WD_TV");
+ //  mountVolumeAppleScript(@"ruediheimlicher",@"rh47",@"WDTVLIVE",@"WD_TV");
 
    self.WDTV_Pfad = [NSString stringWithFormat:@"/Volumes/WD_TV"];
    //NSLog(@"WDTV_Pfad: %@",self.WDTV_Pfad);
@@ -288,7 +357,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    // Film-Daten auf der TM lesen: File auf TM/Mag
    // *************************************************
    
-   mountKellerAppleScript(@"ruediheimlicher",@"rh47",@"TC_Basis",@"Mag");
+  // mountKellerAppleScript(@"ruediheimlicher",@"rh47",@"TC_Basis",@"Mag");
 
    self.Mag_Pfad = [NSString stringWithFormat:@"/Volumes/Mag/Archiv_WDTV"];
    //NSLog(@"Mag_Pfad: %@",self.Mag_Pfad);
@@ -314,12 +383,12 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    // Externes Filmarchiv lesen
    // *************************************************
 
-   NSString* externPfad = [NSString stringWithFormat:@"/Volumes/TV_HD"];
-   //NSLog(@"externPfad: %@",externPfad);
+   self.extern_Pfad = [NSString stringWithFormat:@"/Volumes/TV_HD"];
+   NSLog(@"externPfad: %@",self.extern_Pfad);
    
-   NSArray* externarray = (NSMutableArray*)[self FilmeAnPfad:externPfad];
-   
-   //NSLog(@"externarray: %@",externarray);
+   //externArray = (NSMutableArray*)[self FilmeAnPfad:externPfad];
+   externArray = (NSMutableArray*)[self FilmExtern];
+   //NSLog(@"externarray: %@",externArray);
    
    NSNotificationCenter * nc;
 	nc=[NSNotificationCenter defaultCenter];
@@ -328,7 +397,8 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
 				  name:@"NSWindowWillCloseNotification"
 				object:nil];
 
-   
+   [self.warteschlaufe stopAnimation:NULL];
+   [self.warteschlaufe setHidden:YES];
 }
 
 /*
@@ -381,6 +451,9 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    NSString* sammelPfad = self.WDTV_Pfad;
    if ([Filemanager fileExistsAtPath:sammelPfad])//ist
    {
+      self.errorfeld.stringValue = [[self.errorfeld stringValue]stringByAppendingFormat:@"%@\n",@"WDTV_Ordner da" ];
+      self.wdtv_ok.enabled = 1;
+      self.wdtv_ok.backgroundColor = [NSColor greenColor];
       //NSArray* OrdnerArray = [Filemanager contentsOfDirectoryAtPath:self.WDTV_Pfad error:&err];
       //NSArray* OrdnerArray
       NSArray* OrdnerArray0 =  [Filemanager contentsOfDirectoryAtURL:[NSURL fileURLWithPath:self.WDTV_Pfad]
@@ -431,6 +504,37 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
          } // for order0
       
       }// orderarray0
+   }
+   else
+   {
+     
+       NSString *question = NSLocalizedString(@"Data for Films", @"Daten für Quelle");
+       NSString *info = NSLocalizedString(@"Volume WD_TV not mounted", @"Volume WD_TV ist nicht da.");
+       NSString *retryButton = NSLocalizedString(@"Quit and try mounting", @"Quit anyway button title");
+       NSString *continueButton = NSLocalizedString(@"Continue", @"Cancel button title");
+       NSAlert *alert = [[NSAlert alloc] init];
+       [alert setMessageText:question];
+       [alert setInformativeText:info];
+       [alert addButtonWithTitle:retryButton];
+       [alert addButtonWithTitle:continueButton];
+       
+      
+      NSInteger answer = [alert runModal];
+      NSLog(@"kein Filmmagazin answer: %d NSAlertAlternateReturn: %d",(int)answer, NSAlertAlternateReturn);
+      if (answer == 1000) // 1000, quit
+      {
+         NSLog(@"kein Filmmagazin NSAlertAlternateReturn, quit  : %d",(int)answer);
+         [NSApp terminate:self];
+         
+      }
+      else if(answer == 1001) // 1001,nichts tun
+      {
+         NSLog(@"kein Filmmagazin NSAlertDefaultReturn, nichts tun : %d",(int)answer);
+      }
+      
+      self.wdtv_ok.enabled = 0;
+      self.wdtv_ok.backgroundColor = [NSColor lightGrayColor];
+
    }
    
    //NSLog(@"sammlungArray: %@",[sammlungArray description]);
@@ -522,15 +626,19 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
 
 - (NSArray*)FilmMag
 {
+
    NSMutableArray* tempFilmArray = [[NSMutableArray alloc]initWithCapacity:0];
    NSFileManager *Filemanager=[NSFileManager defaultManager];
    NSError* err=NULL;
    NSURL* Keller_URL=[NSURL fileURLWithPath:self.Mag_Pfad];
    if ([Filemanager fileExistsAtPath:self.Mag_Pfad])//ist
    {
-      
+      self.mag_ok.enabled=1;
+      self.mag_ok.backgroundColor = [NSColor greenColor];
       //NSLog(@"Magordner da");
-      
+      self.Mag_OK = [NSNumber numberWithBool:YES];
+      self.errorfeld.stringValue = [[self.errorfeld stringValue]stringByAppendingFormat:@"\n%@",@"Mag_Ordner da" ];
+
       NSError* err;
       //NSArray* tempOrdnerArray = [Filemanager contentsOfDirectoryAtPath:self.Mag_Pfad error:&err];
       //NSLog(@"err: %@ ArchivOrdnerArray: %@",err,[tempOrdnerArray description]);
@@ -596,6 +704,37 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    }
    else
    {
+      
+      if ([_Host_Name isEqualToString:@"ruediheimlicher.local"] && [_Host_Name isEqualToString:@"minihome.local"])
+      {
+         NSString *question = NSLocalizedString(@"Source for Films", @"Daten aus Film-Magazin");
+         NSString *info = NSLocalizedString(@"Volume TV_HD is not mounted", @"Volume Mag auf TM ist nicht da.");
+         NSString *retryButton = NSLocalizedString(@"Quit and try mounting", @"Quit anyway button title"); // 1000
+         NSString *continueButton = NSLocalizedString(@"Continue ", @"Cancel button title"); // 1001
+         NSAlert *alert = [[NSAlert alloc] init];
+         [alert setMessageText:question];
+         [alert setInformativeText:info];
+         [alert addButtonWithTitle:retryButton];
+         [alert addButtonWithTitle:continueButton];
+         
+         NSInteger answer = [alert runModal];
+         NSLog(@"kein Filmmagazin answer: %d NSAlertAlternateReturn: %d",(int)answer, NSAlertAlternateReturn);
+         if (answer == 1000) // 1000, quit
+         {
+            NSLog(@"kein Filmmagazin NSAlertAlternateReturn, quit  : %d",(int)answer);
+            [NSApp terminate:self];
+            
+         }
+         else if(answer == 1001) // 1001,nichts tun
+         {
+            NSLog(@"kein Filmmagazin NSAlertDefaultReturn, nichts tun : %d",(int)answer);
+         }
+      }
+
+      
+      self.mag_ok.enabled=0;
+      self.mag_ok.backgroundColor = [NSColor lightGrayColor];
+      self.Mag_OK = [NSNumber numberWithBool:NO];
       NSLog(@"kein Magordner da");
    }
 
@@ -615,9 +754,12 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    //NSURL* Keller_URL=[NSURL fileURLWithPath:self.Mag_Pfad];
    if ([Filemanager fileExistsAtPath:self.Filmarchiv_Pfad])//ist
    {
-      self.errorfeld.stringValue =@"FilmArchiv da";
+      self.filmarchiv_ok.enabled=1;
+      self.filmarchiv_ok.backgroundColor = [NSColor greenColor];
+      self.errorfeld.stringValue = [[self.errorfeld stringValue]stringByAppendingFormat:@"\n%@",@"Filmarchiv_Ordner da" ];
+
       //NSLog(@"FilmArchiv da");
-      
+      self.Filmarchiv_OK = [NSNumber numberWithBool:YES];
       NSError* err;
       //NSArray* tempOrdnerArray = [Filemanager contentsOfDirectoryAtPath:self.Mag_Pfad error:&err];
       //NSLog(@"err: %@ ArchivOrdnerArray: %@",err,[tempOrdnerArray description]);
@@ -683,7 +825,11 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    }
    else
    {
-      self.errorfeld.stringValue =@"Kein FilmArchiv da";
+      self.filmarchiv_ok.enabled=0;
+      self.filmarchiv_ok.backgroundColor = [NSColor lightGrayColor];
+      
+      self.Filmarchiv_OK = [NSNumber numberWithBool:NO];
+      //self.errorfeld.stringValue =@"Kein FilmArchiv da";
       NSLog(@"kein Filmarchivordner da");
    }
    
@@ -692,6 +838,124 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
 }
 
 
+- (NSArray*)FilmExtern
+{
+   //NSLog(@"FilmArchiv: %@",self.extern_Pfad);
+   
+   NSMutableArray* FilmexternOrdner = [[NSMutableArray alloc]initWithCapacity:0];
+   //return kellerFilmArray;
+   NSFileManager *Filemanager=[NSFileManager defaultManager];
+   NSError* err=NULL;
+   //NSURL* Keller_URL=[NSURL fileURLWithPath:self.extern_Pfad];
+   if ([Filemanager fileExistsAtPath:self.extern_Pfad])//ist
+   {
+      self.extern_OK = [NSNumber numberWithBool:YES];
+      self.errorfeld.stringValue = [[self.errorfeld stringValue]stringByAppendingFormat:@"\n%@",@"Externe HD da" ];
+      self.extern_ok.enabled=1;
+      self.extern_ok.backgroundColor = [NSColor greenColor];
+      //NSLog(@"externe HD da");
+      NSError* err;
+      //NSArray* tempOrdnerArray = [Filemanager contentsOfDirectoryAtPath:self.Mag_Pfad error:&err];
+      //NSLog(@"err: %@ ArchivOrdnerArray: %@",err,[tempOrdnerArray description]);
+      //NSArray* KellerOrdnerArray=  [Filemanager contentsOfDirectoryAtPath:self.Mag_Pfad error:&err];
+      NSArray* externOrdnerArray=  [Filemanager contentsOfDirectoryAtURL:[NSURL fileURLWithPath:self.extern_Pfad]
+                                                  includingPropertiesForKeys:[NSArray arrayWithObject:NSURLNameKey]
+                                                                     options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                       error:&err];
+      //NSLog(@"externOrdnerArray: %@",externOrdnerArray);
+      
+      BOOL isDir;
+      if ([externOrdnerArray count])
+      {
+         for (NSURL* unterorderurl0 in externOrdnerArray )
+         {
+            //NSLog(@"Niveau 1 unterorderfad: %@",unterorderfad);
+            if([Filemanager fileExistsAtPath:[unterorderurl0 path] isDirectory:&isDir] && isDir)
+            {
+               NSArray* OrdnerArray1 =  [Filemanager contentsOfDirectoryAtURL:unterorderurl0
+                                                   includingPropertiesForKeys:[NSArray arrayWithObject:NSURLNameKey]
+                                                                      options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                        error:&err];
+               //NSLog(@"OrdnerArray1: %@",[OrdnerArray1 description]);
+               
+               if ([OrdnerArray1 count])
+               {
+                  for (NSURL* unterorderurl1 in OrdnerArray1 )
+                  {
+                     //NSLog(@"Niveau 2 unterorderfad: %@",[unterorderurl1 path]);
+                     if([Filemanager fileExistsAtPath:[unterorderurl1 path] isDirectory:&isDir] )
+                     {
+                        //NSLog(@"Niveau 2 File da");
+                        if (isDir)
+                        {
+                           NSArray* OrdnerArray2 =  [Filemanager contentsOfDirectoryAtURL:unterorderurl1
+                                                               includingPropertiesForKeys:[NSArray arrayWithObject:NSURLNameKey]
+                                                                                  options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                                    error:&err];
+                           //NSLog(@"OrdnerArray2: %@",OrdnerArray2);
+                           for (NSURL* titel in OrdnerArray2)
+                           {
+                              //[sammlungArray addObject:[[titel path] lastPathComponent]];
+                              [FilmexternOrdner addObject:[titel path]];
+                           }
+                        }
+                        else
+                        {
+                           [FilmexternOrdner addObject:[unterorderurl1 path]];
+                        }
+                        
+                     } // isDir Ordner1
+                     
+                  } // for order1 count
+                  
+               }// orderarray1 count
+            } // isDir in Order0
+            
+         } // for order0
+         
+      }// orderarray0
+      //NSLog(@"FilmarchivOrdner: %@",[FilmarchivOrdner description]);
+      [self.tvbrowser loadColumnZero];
+
+   }
+   else
+   {
+      if ([_Host_Name isEqualToString:@"ruediheimlicher.home"])
+      {
+         NSString *question = NSLocalizedString(@"Source for Films", @"Daten für Quelle");
+         NSString *info = NSLocalizedString(@"Volume TV_HD is not mounted", @"Volume TV_HD ist nicht da.");
+         NSString *retryButton = NSLocalizedString(@"Quit and try mounting", @"Quit anyway button title"); // 1000
+         NSString *continueButton = NSLocalizedString(@"Continue ", @"Cancel button title"); // 1001
+         NSAlert *alert = [[NSAlert alloc] init];
+         [alert setMessageText:question];
+         [alert setInformativeText:info];
+         [alert addButtonWithTitle:retryButton];
+         [alert addButtonWithTitle:continueButton];
+         
+         NSInteger answer = [alert runModal];
+         NSLog(@"keine externe HD answer: %d NSAlertAlternateReturn: %d",(int)answer, NSAlertAlternateReturn);
+         if (answer == 1000) // 1000, quit
+         {
+            NSLog(@"keine externe HD NSAlertAlternateReturn, quit  : %d",(int)answer);
+            [NSApp terminate:self];
+            
+         }
+         else if(answer == 1001) // 1001,nichts tun
+         {
+             NSLog(@"keine externe HD NSAlertDefaultReturn, nichts tun : %d",(int)answer);
+         }
+      }
+      self.extern_ok.enabled=0;
+      self.extern_ok.backgroundColor = [NSColor lightGrayColor];
+      self.extern_OK = [NSNumber numberWithBool:NO];
+      //self.errorfeld.stringValue =@"Kein FilmArchiv da";
+      
+      NSLog(@"keine externe HD da");
+   }
+   
+   return FilmexternOrdner;
+   
+}
 
 
 - (IBAction)reportSuchen:(id)sender;
@@ -715,8 +979,6 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
     
     */
    self.resultatfeld.stringValue =@"suchen ...";
- 
-
    
    self.opentaste.enabled = NO;
    self.magtaste.enabled = NO;
@@ -740,10 +1002,35 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    NSError* err=NULL;
    
    // Externe HD durchsuchen
-   NSString* archivVolumePfad = @"/Volumes/RH 1TB";
+   NSString* archivVolumePfad = @"/Volumes/TV_HD";
    BOOL archivda = [Filemanager fileExistsAtPath:archivVolumePfad];
-   NSLog(@"archivda: %d",archivda);
+   NSLog(@"suchen: extern da: %d",archivda);
    
+   if (archivda)
+   {
+      for (NSString* magpfad in externArray)
+      {
+         
+         if ([magpfad rangeOfString:suchstring options:NSCaseInsensitiveSearch].length)
+         {
+            NSLog(@"magpfad: %@",magpfad);
+            NSMutableDictionary* findDic = [NSMutableDictionary dictionaryWithObjectsAndKeys:[magpfad lastPathComponent],@"titel",magpfad, @"url", [NSNumber numberWithInt:0], @"mark",[NSNumber numberWithInt:archivda], @"playok", nil];
+            [filmArray addObject:findDic];
+            if ([self.resultatfeld.stringValue length])
+            {
+               self.resultatfeld.stringValue = [NSString stringWithFormat:@"%@ \n %@",self.resultatfeld.stringValue,magpfad];
+            }
+            else
+            {
+               self.resultatfeld.stringValue = magpfad;
+            }
+            
+            
+         }
+         
+      }
+
+   }
    /*
    //if (archivda)
    {
@@ -1080,13 +1367,53 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
 {
    //NSTextFieldCell* selektierteZelle = (NSTextFieldCell*)[self.tvbrowser selectedCell];
    //NSLog(@"reportMag Selected Cell: %@", [selektierteZelle stringValue]);
+   NSLog(@"reportBrowserMag filmLink: %@",filmLink);
+   // Bsp: /Volumes/WD_TV/Tatort/2014/140506 Tatort - Bienzle und der Taximord.mp4
+
+   // erste 2 Teile loeschen
+   NSString* moveLink = [[filmLink stringByDeletingLastPathComponent]stringByDeletingLastPathComponent];
+   NSLog(@"reportBrowserMag moveLink A: %@",moveLink);
+
+   // Bsp: /Tatort/Mag/140506 Tatort - Bienzle und der Taximord.mp4
    
-   NSString* moveLink = [[[filmLink stringByDeletingLastPathComponent]stringByDeletingLastPathComponent]stringByAppendingPathComponent:@"Mag"];
    //NSString* magLink = moveLink;
-   moveLink = [moveLink stringByAppendingPathComponent:[filmLink lastPathComponent]];
-   //NSLog(@"moveLink: %@",moveLink);
+   
    //[[NSWorkspace sharedWorkspace]openFile:moveLink ];
    
+  // NSLog(@"reportBrowserMag filmarchiv_ok: %d",[self.filmarchiv_ok isEnabled]);
+   NSArray*filmlinkArray = [filmLink componentsSeparatedByString:@"/"];
+   if ([[filmlinkArray objectAtIndex:0]isEqualToString:@""])
+       {
+          filmlinkArray = [filmlinkArray subarrayWithRange:NSMakeRange(1, [filmlinkArray  count]-1)];
+       }
+   NSLog(@"reportBrowserMag filmlinkArray: %@",filmlinkArray);
+   /*
+    Volumes,
+    "WD_TV",
+    Tatort,
+    2014,
+    "140804 Tatort - 597-912, Minenspiel.mp4"
+    */
+   moveLink = [moveLink stringByAppendingPathComponent:@"Mag"];
+   if ([self.filmarchiv_ok isEnabled])
+   {
+      
+      //moveLink = [NSString stringWithFormat:@"%@/Archiv_%@/%@",self.Filmarchiv_Pfad,[filmlinkArray objectAtIndex:2],[filmlinkArray objectAtIndex:4]];
+   }
+   else if ([self.mag_ok  isEnabled])
+   {
+      
+   }
+   else
+   {
+      //moveLink = [moveLink stringByAppendingPathComponent:@"Mag"];
+   }
+   
+   NSLog(@"reportBrowserMag moveLink C: %@",moveLink);
+   
+   moveLink = [moveLink stringByAppendingPathComponent:[filmLink lastPathComponent]];
+   NSLog(@"reportBrowserMag moveLink D: %@",moveLink);
+
    
    NSError* err=NULL;
    NSFileManager* Filemanager = [NSFileManager defaultManager];
@@ -1094,12 +1421,17 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    //   [self.tvbrowser loadColumnZero];
    
    int erfolg = [Filemanager moveItemAtPath:filmLink toPath:moveLink error:&err];
+ //int erfolg = [Filemanager copyItemAtURL:[NSURL fileURLWithPath:filmLink isDirectory:NO] toURL:[NSURL fileURLWithPath:moveLink  isDirectory:NO] error:&err];
    //NSLog(@"mag erfolg: %d err: %@",erfolg, [err description]);
    //NSLog(@"matrix: %@",[[self.tvbrowser matrixInColumn:2]description]);
    if (erfolg==0)
    {
       NSAlert *theAlert = [NSAlert alertWithError:err];
       [theAlert runModal]; // Ignore return value.
+   }
+   else
+   {
+      NSLog(@"mag erfolg: %d",erfolg);
    }
    
    [[self.tvbrowser parentForItemsInColumn:[self.tvbrowser clickedColumn]]invalidateChildren];
@@ -1112,22 +1444,36 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
 
 - (IBAction)reportMag:(id)sender
 {
+   NSString*    moveLink = [[[filmLink stringByDeletingLastPathComponent]stringByDeletingLastPathComponent]stringByAppendingPathComponent:@"Mag"];
+
    NSTextFieldCell* selektierteZelle = (NSTextFieldCell*)[self.tvbrowser selectedCell];
    //NSLog(@"reportMag Selected Cell: %@", [selektierteZelle stringValue]);
 
-   NSString* moveLink = [[[filmLink stringByDeletingLastPathComponent]stringByDeletingLastPathComponent]stringByAppendingPathComponent:@"Mag"];
+   if (self.filmarchiv_ok.integerValue)
+   {
+      
+      moveLink = [[[filmLink stringByDeletingLastPathComponent]stringByDeletingLastPathComponent]stringByAppendingPathComponent:@"Mag"];
+   }
+   else if (self.mag_ok.integerValue)
+   {
+      
+   }
+   else
+   {
+   
+   }
    //NSString* magLink = moveLink;
    moveLink = [moveLink stringByAppendingPathComponent:[filmLink lastPathComponent]];
-   //NSLog(@"moveLink: %@",moveLink);
+   NSLog(@"reportMag moveLink: %@",moveLink);
    //[[NSWorkspace sharedWorkspace]openFile:moveLink ];
-   
+   return;
    
    NSError* err=NULL;
    NSFileManager* Filemanager = [NSFileManager defaultManager];
    //NSLog(@"OrdnerArray vor: %@",[self.WDTV_Array description]);
 //   [self.tvbrowser loadColumnZero];
-   
-   int erfolg = [Filemanager moveItemAtPath:filmLink toPath:moveLink error:&err];
+   int erfolg=0;
+   erfolg = [Filemanager moveItemAtPath:filmLink toPath:moveLink error:&err];
    //NSLog(@"mag erfolg: %d err: %@",erfolg, [err description]);
    //NSLog(@"matrix: %@",[[self.tvbrowser matrixInColumn:2]description]);
    if (erfolg==0)
@@ -1152,7 +1498,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    
    //NSLog(@"reportMagVonTable selektierterPfad: *%@*", selektierterPfad);
    
-   NSString* moveLink = [[[selektierterPfad stringByDeletingLastPathComponent]stringByDeletingLastPathComponent]stringByAppendingPathComponent:@"mag"];
+   NSString* moveLink = [[[selektierterPfad stringByDeletingLastPathComponent]stringByDeletingLastPathComponent]stringByAppendingPathComponent:@"Mag"];
    
    moveLink = [moveLink stringByAppendingPathComponent:[selektierterPfad lastPathComponent]];
    NSLog(@"moveLink: %@",moveLink);
@@ -1350,6 +1696,9 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
       }
    }];//
 }
+
+
+
 
 - (IBAction)reportMagazinAktualisieren:(id)sender // Daten auf externer HD
 {
@@ -1816,7 +2165,11 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
 {
    if (rootNode == nil)
    {
-      rootNode = [[FileSystemNode alloc] initWithURL:[NSURL fileURLWithPath:@"/Volumes/WD_TV"]];
+      rootNode = [[FileSystemNode alloc] initWithURL:[NSURL fileURLWithPath:self.rootNodePath]];
+      
+      //rootNode = [[FileSystemNode alloc] initWithURL:[NSURL fileURLWithPath:@"/Volumes/WD_TV"]];
+      //rootNode = [[FileSystemNode alloc] initWithURL:[NSURL fileURLWithPath:@"/Volumes/TV_HD"]];
+
    }
    return rootNode;
 }
