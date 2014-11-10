@@ -306,12 +306,98 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
  //  mountVolumeAppleScript(@"ruediheimlicher",@"rh47",@"WDTVLIVE",@"WD_TV");
 
    self.WDTV_Pfad = [NSString stringWithFormat:@"/Volumes/WD_TV"];
-   //NSLog(@"WDTV_Pfad: %@",self.WDTV_Pfad);
+   NSLog(@"WDTV_Pfad: %@",self.WDTV_Pfad);
+   
+   NSLog(@"home: %@",NSHomeDirectory());
+   
+   
    
    NSURL* WDTV_URL=[NSURL fileURLWithPath:self.WDTV_Pfad];
    
    
    wdtvArray = (NSMutableArray*)[self Film_WDTV];
+   //NSLog(@"wdtvArray: %@",wdtvArray );
+   NSString* wdtv_ort = self.WDTV_Pfad.lastPathComponent;
+   //NSLog(@"wdtv_ort: %@ count: %d",wdtv_ort ,wdtvArray.count);
+   
+   NSString* wdtvListe = [self titelListeAusArray:wdtvArray];
+   
+   //NSLog(@"wdtvListe: %@",wdtvListe );
+   
+   NSLog(@"***");
+   
+   NSMutableArray* wdtvListArray = [[NSMutableArray alloc]initWithCapacity:0];
+   for (int i=0;i<wdtvArray.count;i++)
+   {
+     // NSString* tempFilmTitel = [[wdtvArray objectAtIndex:i]stringByDeletingLastPathComponent];
+      NSString* tempFilmTitel = [[[wdtvArray objectAtIndex:i] stringByReplacingOccurrencesOfString:self.WDTV_Pfad withString:@""]substringFromIndex:1];// erstes tab weg
+      
+      //NSLog(@"tempFilmTitel: %@",tempFilmTitel );
+      NSArray* tempElementeArray = [tempFilmTitel componentsSeparatedByString:@"/"]; // Am anfang steht ein /
+      
+       //NSLog(@"tempFilmTitel: %@ anz: %d",tempFilmTitel,[[tempFilmTitel componentsSeparatedByString:@"/"] count] );
+      
+      switch (tempElementeArray.count)
+      {
+         case 3: // alles vorhanden
+         {
+            NSString* tempZeilenString = [tempElementeArray componentsJoinedByString:@"\t"];
+            NSMutableDictionary* tempZeilenDic = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                                  
+                                                  [tempElementeArray objectAtIndex:0],@"art",
+                                                  [tempElementeArray objectAtIndex:1],@"sub",
+                                                  tempZeilenString,@"titelstring",
+                                                [tempElementeArray objectAtIndex:2],@"titel", nil];
+            [wdtvListArray addObject:tempZeilenDic];
+            
+         }break;
+         case 2:
+         {
+            NSLog(@"3 El : %@",[tempElementeArray lastObject]);
+         }break;
+         case 1:
+         {
+            NSLog(@"2 El : %@",[tempElementeArray lastObject]);
+         }break;
+         default:
+         {
+            NSLog(@"falscher Titel : %@",tempFilmTitel);
+         }break;
+      }
+   }
+   
+//   NSLog(@"wdtvListArray: %@",wdtvListArray );
+   /*
+   NSString* wdtvListe = [NSString string];
+   for (int i=0;i<wdtvListArray.count;i++)
+   {
+      wdtvListe = [wdtvListe stringByAppendingFormat:@"%@\t%@\n",self.WDTV_Pfad.lastPathComponent,[[wdtvListArray objectAtIndex:i]objectForKey:@"titelstring"]];
+   }
+//   NSLog(@"wdtvListe: \n%@",wdtvListe );
+   */
+   NSString* ListePfad=[NSHomeDirectory() stringByAppendingFormat:@"%@%@%@",@"/Documents",@"/WDTVDaten",@"/wdtvliste.txt"];
+
+   NSURL* ListeURL = [NSURL fileURLWithPath:ListePfad];
+   
+   NSLog(@"ListeURL: %@",ListeURL );
+
+   NSError *error = nil;
+   success = [wdtvListe writeToURL:ListeURL
+                        atomically:YES
+                          encoding:NSUTF8StringEncoding
+                             error:&error];
+   
+   NSString *status = success ? @"Success" : @"Failure";
+   if(success){
+      NSLog(@"Done Writing: %@",status);
+   }
+   else{
+      NSLog(@"Done Writing: %@",status);
+      NSLog(@"Error: %@",[error localizedDescription]);
+   }
+   BOOL erfolg = [wdtvListe writeToURL:ListeURL atomically:YES encoding: NSUTF8StringEncoding error:NULL];
+   
+   NSLog(@"write wdtvListe: %d",erfolg );
    
    /*
    NSFileManager *Filemanager=[NSFileManager defaultManager];
@@ -363,6 +449,37 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    //NSLog(@"Mag_Pfad: %@",self.Mag_Pfad);
    
    magArray = (NSMutableArray*)[self FilmMag];
+   
+   NSString* magListe = [self titelListeAusArray:magArray];
+   
+   NSLog(@"magListe: %@",magListe );
+   
+   NSLog(@"***");
+   NSString* magPfad=[NSHomeDirectory() stringByAppendingFormat:@"%@%@%@",@"/Documents",@"/WDTVDaten",@"/magliste.txt"];
+   
+   NSURL* magURL = [NSURL fileURLWithPath:magPfad];
+   
+   NSLog(@"magURL: %@",magURL );
+   
+   NSError *magerror = nil;
+   success = [magListe writeToURL:magURL
+                        atomically:YES
+                          encoding:NSUTF8StringEncoding
+                             error:&magerror];
+   
+   NSString *magstatus = success ? @"Success" : @"Failure";
+   if(success){
+      NSLog(@"Done Writing: %@",magstatus);
+   }
+   else{
+      NSLog(@"Done Writing: %@",magstatus);
+      NSLog(@"Error: %@",[error localizedDescription]);
+   }
+   BOOL magerfolg = [magListe writeToURL:magURL atomically:YES encoding: NSUTF8StringEncoding error:NULL];
+   
+   NSLog(@"write magListe: %d",magerfolg );
+
+
    
    
    //NSLog(@"magArray: %@",magArray);
@@ -439,6 +556,61 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    //NSLog(@"indexPath: %@ cell: %@", indexPath,[_browser selectedCell]);
    NSLog(@"cell: %@ ", [[self.tvbrowser selectedCell]stringValue]);
    
+}
+
+- (NSString*)titelListeAusArray:(NSArray*)derFilmArray
+{
+   NSMutableArray* ListeArray = [[NSMutableArray alloc]initWithCapacity:0];
+   for (int i=0;i<derFilmArray.count;i++)
+   {
+      //NSString* tempFilmTitel = [[derFilmArray objectAtIndex:i]stringByDeletingLastPathComponent];
+      NSString* tempFilm = [derFilmArray objectAtIndex:i]; // WD_TV		Volumes	WD_TV	Tatort	Mag	Tatort 130323 Summ, Summ, Summ.mpg
+     //NSString* tempFilmTitel = [[[filmArray objectAtIndex:i] stringByReplacingOccurrencesOfString:self.WDTV_Pfad withString:@""]substringFromIndex:1];// erstes tab weg
+      
+      //NSLog(@"tempFilmTitel: %@",tempFilmTitel );
+      NSArray* tempElementeArray = [tempFilm componentsSeparatedByString:@"/"]; // Am anfang steht ein /
+      
+     // NSLog(@"tempFilmTitel: %@ anz: %d",tempFilm,[[tempFilm componentsSeparatedByString:@"/"] count] );
+      
+      switch (tempElementeArray.count)
+      {
+         case 6: // alles vorhanden
+         {
+            NSString* tempZeilenString = [[tempElementeArray subarrayWithRange:NSMakeRange(3, 3)]componentsJoinedByString:@"\t"];
+            
+            NSMutableDictionary* tempZeilenDic = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                                  [tempElementeArray objectAtIndex:2],@"ort",
+                                                  [tempElementeArray objectAtIndex:3],@"art",
+                                                  [tempElementeArray objectAtIndex:4],@"sub",
+                                                  tempZeilenString,@"titelstring",
+                                                  [tempElementeArray objectAtIndex:5],@"titel", nil];
+            [ListeArray addObject:tempZeilenDic];
+            
+         }break;
+         case 2:
+         {
+            NSLog(@"3 El : %@",[tempElementeArray lastObject]);
+         }break;
+         case 1:
+         {
+            NSLog(@"2 El : %@",[tempElementeArray lastObject]);
+         }break;
+         default:
+         {
+            NSLog(@"falscher Titel : %@",tempFilm);
+         }break;
+      }
+   }
+   
+  // NSLog(@"ListeArray: %@",ListeArray );
+   NSString* Liste = [NSString string];
+   for (int i=0;i<ListeArray.count;i++)
+   {
+      Liste = [Liste stringByAppendingFormat:@"%@\t%@\n",[[ListeArray objectAtIndex:i]objectForKey:@"ort"],[[ListeArray objectAtIndex:i]objectForKey:@"titelstring"]];
+   }
+   //NSLog(@"wdtvListe: %@",wdtvListe );
+
+   return Liste;
 }
 
 
