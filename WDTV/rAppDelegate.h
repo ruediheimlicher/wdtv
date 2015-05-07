@@ -10,17 +10,22 @@
 
 @class FileSystemNode;
  
-@interface rAppDelegate : NSObject <NSApplicationDelegate, NSBrowserDelegate, NSTableViewDataSource, NSTableViewDelegate, NSTextFieldDelegate>
+@interface rAppDelegate : NSObject <NSApplicationDelegate, NSBrowserDelegate, NSTableViewDataSource, NSTableViewDelegate, NSTextFieldDelegate,NSURLConnectionDelegate, NSURLConnectionDataDelegate,NSURLConnectionDownloadDelegate>
 {
    FileSystemNode *rootNode;  // Data source für Browser
    
    NSMutableArray* filmArray; // Data Source fuer TableView FilmTable
    
    // Arrays fuer Filmsammlungen
-   NSMutableArray * wdtvArray;
+   NSMutableArray * wdtvArray; // HD an WDTVLive
    NSMutableArray * magArray;
-   NSMutableArray * externArray;
-   NSMutableArray * filmarchivArray;
+   NSMutableArray * TV_HD_A_Array;
+   NSMutableArray * TV_HD_B_Array;
+   NSMutableArray * Filmarchiv_Array;
+   NSMutableArray * WD_TV_A_Array;
+   NSMutableArray * WD_TV_B_Array;
+   
+   NSMutableArray * Volumes_Array;
    
    IBOutlet NSTableView* filmTable;
    NSString* filmLink;
@@ -37,20 +42,34 @@
 @property (assign) IBOutlet  NSButton* archivtaste;
 @property (assign) IBOutlet  NSButton* openexterntaste;
 
+@property (assign) IBOutlet  NSButton* listetaste;
+
+
 @property (assign) IBOutlet  NSTextField* mag_ok;
 @property (assign) IBOutlet  NSTextField* filmarchiv_ok;
-@property (assign) IBOutlet  NSTextField* wdtv_ok;
-@property (assign) IBOutlet  NSTextField* extern_ok;
+@property (assign) IBOutlet  NSTextField* WD_TV_A_OK_Feld;
+@property (assign) IBOutlet  NSTextField* WD_TV_B_OK_Feld;
+
+@property (assign) IBOutlet  NSTextField* WDTV_OK_Feld;
+@property (assign) IBOutlet  NSTextField* TV_HD_A_OK_Feld;
+@property (assign) IBOutlet  NSTextField* TV_HD_B_OK_Feld;
+@property (assign) IBOutlet  NSTextField* wdtva_ok;
+@property (assign) IBOutlet  NSTextField* wdtvb_ok;
+
 
 @property (assign) IBOutlet  NSTextField* suchfeld;
 @property (assign) IBOutlet  NSTextField* resultatfeld;
 @property (assign) IBOutlet  NSTextField* linkfeld;
 
-@property (assign) IBOutlet  NSTextField* errorfeld;
+@property (assign) IBOutlet  NSTextView* errorfeld;
 @property (assign) IBOutlet  NSTextField* hostnamefeld;
 @property (assign) IBOutlet  NSTextField* ipfeld;
 
 @property (assign) IBOutlet  NSProgressIndicator* warteschlaufe;
+
+
+@property (assign) IBOutlet  NSPopUpButton * volumepop;
+
 
 
 
@@ -72,9 +91,21 @@
 @property NSArray * Filmarchiv_Array;
 @property NSNumber * Filmarchiv_OK; // Filmarchiv an mini ist da
 
-@property NSString * extern_Pfad; // externe HD an mini, sofern da
-@property NSArray * extern_Array;
-@property NSNumber * extern_OK; // externe HD ist da
+@property NSString * TV_HD_A_Pfad; // TV_HD_A an mini, sofern da
+@property NSArray * TV_HD_A_Array;
+@property NSNumber * TV_HD_A_OK; // TV_HD_A ist da
+
+@property NSString * TV_HD_B_Pfad; // TV_HD_A an mini, sofern da
+@property NSArray * TV_HD_B_Array;
+@property NSNumber * TV_HD_B_OK; // TV_HD_A ist da
+
+@property NSString * WD_TV_A_Pfad; // WD_TV_A an mini, sofern da
+@property NSArray * WD_TV_A_Array;
+@property NSNumber * WD_TV_A_OK; // WD_TV_A HD ist da
+
+@property NSString * WD_TV_B_Pfad; // WD_TV_B an mini, sofern da
+@property NSArray * WD_TV_B_Array;
+@property NSNumber * WD_TV_B_OK; // WD_TV_B HD ist da
 
 
 
@@ -99,10 +130,14 @@
 - (IBAction)reportKellerAktualisieren:(id)sender;
 - (IBAction)reportDouble:(id)sender;
 - (IBAction)reportDeleteVonTable:(id)sender;
--(IBAction)reportOpenExtern:(id)sender;
+- (IBAction)reportOpenExtern:(id)sender;
+- (IBAction)reportListe:(id)sender;
+- (IBAction)reportRefreshFilmlisten:(id)sender;
+- (IBAction)reportVolumePop:(id)sender;
 - (NSArray*)Film_WDTV;
 - (NSArray*)FilmArchiv;
 - (NSArray*)FilmMag;
-- (NSArray*)FilmExtern;
+- (NSArray*)Film_TV_HD_A;
 - (NSArray*)FilmeAnPfad:(NSString*)pfad;
+- (NSError*)writeTitelListe:(NSString*)titelliste toPath:(NSString*) pfad;
 @end

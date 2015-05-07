@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="5056" systemVersion="13D65" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="7702" systemVersion="14C109" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
-        <deployment defaultVersion="1080" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="5056"/>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="7702"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="NSApplication">
@@ -11,7 +11,7 @@
             </connections>
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
-        <customObject id="-3" userLabel="Application"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <menu title="AMainMenu" systemMenu="main" id="29">
             <items>
                 <menuItem title="WDTV" id="56">
@@ -676,7 +676,7 @@
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                         <connections>
-                            <outlet property="delegate" destination="494" id="813"/>
+                            <outlet property="delegate" destination="494" id="WGG-Km-auV"/>
                         </connections>
                     </textField>
                     <browser verticalHuggingPriority="750" allowsExpansionToolTips="YES" enabled="YES" hasHorizontalScroller="YES" allowsEmptySelection="YES" defaultColumnWidth="450" minColumnWidth="50" maxVisibleColumns="3" titled="YES" separatesColumns="YES" allowsTypeSelect="YES" columnResizingType="auto" id="549">
@@ -700,14 +700,14 @@
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
                                 <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" multipleSelection="NO" autosaveColumns="NO" headerView="705" id="703">
-                                    <rect key="frame" x="0.0" y="0.0" width="1238" height="125"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="1172" height="19"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxY="YES"/>
                                     <size key="intercellSpacing" width="3" height="2"/>
-                                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                    <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <tableViewGridLines key="gridStyleMask" vertical="YES"/>
                                     <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                     <tableColumns>
-                                        <tableColumn identifier="titel" width="373.171875" minWidth="40" maxWidth="1000" id="707">
+                                        <tableColumn identifier="titel" width="277.171875" minWidth="40" maxWidth="1000" id="707">
                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Titel">
                                                 <font key="font" metaFont="smallSystem"/>
                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -720,7 +720,7 @@
                                             </textFieldCell>
                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                         </tableColumn>
-                                        <tableColumn identifier="url" width="539.93359375" minWidth="40" maxWidth="1000" id="708">
+                                        <tableColumn identifier="url" width="677.93359375" minWidth="40" maxWidth="1000" id="708">
                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="URL">
                                                 <font key="font" metaFont="smallSystem"/>
                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -772,7 +772,7 @@
                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                         </tableColumn>
                                         <tableColumn identifier="mag" width="58.21875" minWidth="10" maxWidth="3.4028234663852886e+38" id="838">
-                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="> Mag">
+                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="&gt; Mag">
                                                 <font key="font" metaFont="smallSystem"/>
                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -793,7 +793,7 @@
                             <rect key="frame" x="1" y="126" width="1238" height="16"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
-                        <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="706">
+                        <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="706">
                             <rect key="frame" x="224" y="17" width="15" height="102"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
@@ -803,9 +803,9 @@
                         </tableHeaderView>
                     </scrollView>
                     <button verticalHuggingPriority="750" id="758">
-                        <rect key="frame" x="1020" y="95" width="58" height="25"/>
+                        <rect key="frame" x="1024" y="91" width="58" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES"/>
-                        <buttonCell key="cell" type="squareTextured" title="play" bezelStyle="texturedSquare" imagePosition="overlaps" alignment="center" enabled="NO" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="759">
+                        <buttonCell key="cell" type="push" title="play" bezelStyle="rounded" alignment="center" enabled="NO" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="759">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
@@ -814,9 +814,9 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" id="766">
-                        <rect key="frame" x="1082" y="95" width="67" height="25"/>
+                        <rect key="frame" x="1082" y="91" width="67" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES"/>
-                        <buttonCell key="cell" type="squareTextured" title=">mag" bezelStyle="texturedSquare" imagePosition="overlaps" alignment="center" enabled="NO" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="768">
+                        <buttonCell key="cell" type="push" title="&gt;mag" bezelStyle="rounded" alignment="center" enabled="NO" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="768">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
@@ -825,9 +825,9 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" id="774">
-                        <rect key="frame" x="1190" y="94" width="70" height="25"/>
+                        <rect key="frame" x="1174" y="91" width="86" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES"/>
-                        <buttonCell key="cell" type="squareTextured" title="delete" bezelStyle="texturedSquare" imagePosition="overlaps" alignment="center" enabled="NO" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="775">
+                        <buttonCell key="cell" type="push" title="delete" bezelStyle="rounded" alignment="center" enabled="NO" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="775">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
@@ -836,7 +836,7 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" id="806">
-                        <rect key="frame" x="962" y="539" width="146" height="32"/>
+                        <rect key="frame" x="1098" y="549" width="146" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="push" title="Doppelte suchen" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="807">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -847,9 +847,9 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" id="820">
-                        <rect key="frame" x="1190" y="49" width="70" height="25"/>
+                        <rect key="frame" x="1174" y="45" width="86" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
-                        <buttonCell key="cell" type="squareTextured" title=">archiv" bezelStyle="texturedSquare" imagePosition="overlaps" alignment="center" enabled="NO" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="821">
+                        <buttonCell key="cell" type="push" title="&gt;archiv" bezelStyle="rounded" alignment="center" enabled="NO" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="821">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
@@ -866,15 +866,6 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="LER-ke-vrq">
-                        <rect key="frame" x="137" y="25" width="1030" height="62"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="nUu-0d-XWc">
-                            <font key="font" metaFont="system"/>
-                            <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                        </textFieldCell>
-                    </textField>
                     <textField verticalHuggingPriority="750" id="uCe-e2-rjT">
                         <rect key="frame" x="257" y="495" width="161" height="22"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -884,17 +875,6 @@
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <button verticalHuggingPriority="750" id="zn7-bv-FJO">
-                        <rect key="frame" x="1182" y="19" width="86" height="25"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
-                        <buttonCell key="cell" type="squareTextured" title="Open Extern" bezelStyle="texturedSquare" imagePosition="overlaps" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="KPA-6I-NzG">
-                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="system"/>
-                        </buttonCell>
-                        <connections>
-                            <action selector="reportOpenExtern:" target="494" id="Vlq-nb-Ouu"/>
-                        </connections>
-                    </button>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="fhj-JM-hrk">
                         <rect key="frame" x="17" y="500" width="101" height="17"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -913,15 +893,6 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="ggC-62-3lt">
-                        <rect key="frame" x="17" y="300" width="104" height="17"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Filme auf WDTV" id="GXm-PK-4Ho">
-                            <font key="font" metaFont="system"/>
-                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                        </textFieldCell>
-                    </textField>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="beD-ww-ONA">
                         <rect key="frame" x="919" y="293" width="217" height="17"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -932,7 +903,7 @@
                         </textFieldCell>
                     </textField>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="oEj-HK-vO6">
-                        <rect key="frame" x="756" y="556" width="97" height="21"/>
+                        <rect key="frame" x="776" y="556" width="97" height="21"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="center" title="Filmarchiv" drawsBackground="YES" id="Cio-CH-9x3">
                             <font key="font" metaFont="cellTitle"/>
@@ -941,7 +912,7 @@
                         </textFieldCell>
                     </textField>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="Hig-xn-Nc2">
-                        <rect key="frame" x="756" y="531" width="97" height="21"/>
+                        <rect key="frame" x="776" y="531" width="97" height="21"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="center" title="Mag auf TM" drawsBackground="YES" id="Yfi-D3-jWR">
                             <font key="font" metaFont="cellTitle"/>
@@ -950,16 +921,16 @@
                         </textFieldCell>
                     </textField>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="I61-ot-9xs">
-                        <rect key="frame" x="756" y="507" width="97" height="21"/>
+                        <rect key="frame" x="939" y="556" width="97" height="21"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="center" title="TV_HD" drawsBackground="YES" id="okO-sy-M0z">
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="center" title="TV_HD_A" drawsBackground="YES" id="okO-sy-M0z">
                             <font key="font" metaFont="cellTitle"/>
                             <color key="textColor" red="0.98336190621655906" green="1" blue="0.93769733591651749" alpha="1" colorSpace="calibratedRGB"/>
                             <color key="backgroundColor" red="0.76217964326110488" green="0.76811623086734693" blue="0.76177280416652871" alpha="1" colorSpace="calibratedRGB"/>
                         </textFieldCell>
                     </textField>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="mwg-qH-coK">
-                        <rect key="frame" x="570" y="531" width="93" height="46"/>
+                        <rect key="frame" x="662" y="556" width="93" height="21"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="center" title="WDTV" drawsBackground="YES" id="Cyj-YB-XQN">
                             <font key="font" metaFont="system" size="14"/>
@@ -968,7 +939,7 @@
                         </textFieldCell>
                     </textField>
                     <progressIndicator horizontalHuggingPriority="750" verticalHuggingPriority="750" maxValue="100" bezeled="NO" indeterminate="YES" style="spinning" id="Y3i-9m-cLN">
-                        <rect key="frame" x="688" y="540" width="32" height="32"/>
+                        <rect key="frame" x="581" y="545" width="32" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     </progressIndicator>
                     <textField verticalHuggingPriority="750" id="2KM-Ro-fXA">
@@ -989,20 +960,141 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="6qi-7M-rDb">
+                        <rect key="frame" x="662" y="529" width="93" height="23"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="center" title="WD_TV_A" drawsBackground="YES" id="lwy-Ov-ZrD">
+                            <font key="font" metaFont="system" size="14"/>
+                            <color key="textColor" red="0.98336190619999997" green="1" blue="0.93769733590000004" alpha="1" colorSpace="calibratedRGB"/>
+                            <color key="backgroundColor" red="0.76217964329999999" green="0.76811623090000003" blue="0.76177280420000004" alpha="1" colorSpace="calibratedRGB"/>
+                        </textFieldCell>
+                    </textField>
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="oZh-t9-4c1">
+                        <rect key="frame" x="662" y="505" width="93" height="23"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="center" title="WD_TV_B" drawsBackground="YES" id="QVQ-pf-4K8">
+                            <font key="font" metaFont="system" size="14"/>
+                            <color key="textColor" red="0.98336190619999997" green="1" blue="0.93769733590000004" alpha="1" colorSpace="calibratedRGB"/>
+                            <color key="backgroundColor" red="0.76217964329999999" green="0.76811623090000003" blue="0.76177280420000004" alpha="1" colorSpace="calibratedRGB"/>
+                        </textFieldCell>
+                    </textField>
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="4nm-p9-3EP">
+                        <rect key="frame" x="939" y="531" width="97" height="21"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="center" title="TV_HD_B" drawsBackground="YES" id="nfz-lq-pRe">
+                            <font key="font" metaFont="cellTitle"/>
+                            <color key="textColor" red="0.98336190619999997" green="1" blue="0.93769733590000004" alpha="1" colorSpace="calibratedRGB"/>
+                            <color key="backgroundColor" red="0.76217964329999999" green="0.76811623090000003" blue="0.76177280420000004" alpha="1" colorSpace="calibratedRGB"/>
+                        </textFieldCell>
+                    </textField>
+                    <scrollView horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" id="zmO-up-n5G">
+                        <rect key="frame" x="57" y="6" width="545" height="88"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <clipView key="contentView" id="2PM-IC-fIR">
+                            <rect key="frame" x="1" y="1" width="223" height="133"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            <subviews>
+                                <textView importsGraphics="NO" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" dashSubstitution="YES" spellingCorrection="YES" smartInsertDelete="YES" id="DKW-E4-XPu">
+                                    <rect key="frame" x="0.0" y="0.0" width="528" height="86"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                    <size key="minSize" width="528" height="86"/>
+                                    <size key="maxSize" width="730" height="10000000"/>
+                                    <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <size key="minSize" width="528" height="86"/>
+                                    <size key="maxSize" width="730" height="10000000"/>
+                                </textView>
+                            </subviews>
+                            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        </clipView>
+                        <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="YES" id="V74-jP-gli">
+                            <rect key="frame" x="-100" y="-100" width="87" height="18"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </scroller>
+                        <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="46K-ve-qwM">
+                            <rect key="frame" x="224" y="1" width="15" height="133"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </scroller>
+                    </scrollView>
+                    <button verticalHuggingPriority="750" id="wVu-Bf-Ric">
+                        <rect key="frame" x="1098" y="516" width="146" height="32"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <buttonCell key="cell" type="push" title="Liste sichern" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="LGZ-53-6pr">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="reportListe:" target="494" id="vgX-Q5-imR"/>
+                        </connections>
+                    </button>
+                    <popUpButton verticalHuggingPriority="750" id="PPQ-E5-WBv">
+                        <rect key="frame" x="71" y="310" width="186" height="26"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <popUpButtonCell key="cell" type="push" title="Item 1" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="t9l-6k-aUY" id="70T-pp-eR2">
+                            <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="menu"/>
+                            <menu key="menu" id="JoD-xE-6w7">
+                                <items>
+                                    <menuItem title="Item 1" state="on" id="t9l-6k-aUY"/>
+                                    <menuItem title="Item 2" id="ruB-Qy-Y38"/>
+                                    <menuItem title="Item 3" id="IMU-kR-Wdr"/>
+                                </items>
+                            </menu>
+                        </popUpButtonCell>
+                        <connections>
+                            <action selector="reportVolumePop:" target="494" id="7il-Qg-2ew"/>
+                        </connections>
+                    </popUpButton>
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="ggC-62-3lt">
+                        <rect key="frame" x="18" y="315" width="49" height="17"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Filme " id="GXm-PK-4Ho">
+                            <font key="font" metaFont="system"/>
+                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                        </textFieldCell>
+                    </textField>
+                    <button verticalHuggingPriority="750" id="zn7-bv-FJO">
+                        <rect key="frame" x="1174" y="12" width="86" height="32"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
+                        <buttonCell key="cell" type="push" title="Open Extern" bezelStyle="rounded" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="KPA-6I-NzG">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="reportOpenExtern:" target="494" id="Vlq-nb-Ouu"/>
+                        </connections>
+                    </button>
+                    <button verticalHuggingPriority="750" id="Te4-sY-FBa">
+                        <rect key="frame" x="939" y="497" width="98" height="32"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <buttonCell key="cell" type="push" title="refresh" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="hZL-1y-N1K">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                            <connections>
+                                <action selector="reportRefreshFilmlisten:" target="494" id="hJI-rU-jes"/>
+                            </connections>
+                        </buttonCell>
+                    </button>
                 </subviews>
             </view>
         </window>
         <customObject id="494" customClass="rAppDelegate">
             <connections>
+                <outlet property="TV_HD_A_OK_Feld" destination="I61-ot-9xs" id="Qhj-Bt-omp"/>
+                <outlet property="TV_HD_B_OK_Feld" destination="4nm-p9-3EP" id="ITl-lP-wqd"/>
+                <outlet property="WDTV_OK_Feld" destination="mwg-qH-coK" id="NYo-t3-cDy"/>
+                <outlet property="WD_TV_A_OK_Feld" destination="6qi-7M-rDb" id="4yx-hV-jTY"/>
+                <outlet property="WD_TV_B_OK_Feld" destination="oZh-t9-4c1" id="BJs-zg-kl1"/>
                 <outlet property="archivtaste" destination="820" id="832"/>
                 <outlet property="deletetaste" destination="774" id="783"/>
-                <outlet property="errorfeld" destination="LER-ke-vrq" id="xAT-yd-KuW"/>
-                <outlet property="extern_ok" destination="I61-ot-9xs" id="Qhj-Bt-omp"/>
+                <outlet property="errorfeld" destination="DKW-E4-XPu" id="822-05-YgM"/>
                 <outlet property="filmTable" destination="703" id="718"/>
                 <outlet property="filmarchiv_ok" destination="oEj-HK-vO6" id="wiS-iX-Uqd"/>
                 <outlet property="hostnamefeld" destination="uCe-e2-rjT" id="5iT-Bg-zo4"/>
                 <outlet property="ipfeld" destination="2KM-Ro-fXA" id="UOE-9Z-G31"/>
                 <outlet property="linkfeld" destination="558" id="757"/>
+                <outlet property="listetaste" destination="wVu-Bf-Ric" id="MJr-Nq-Tta"/>
                 <outlet property="mag_ok" destination="Hig-xn-Nc2" id="Dru-Sy-slY"/>
                 <outlet property="magtaste" destination="766" id="784"/>
                 <outlet property="openexterntaste" destination="zn7-bv-FJO" id="5Oj-w7-yfE"/>
@@ -1010,8 +1102,8 @@
                 <outlet property="suchentaste" destination="536" id="637"/>
                 <outlet property="suchfeld" destination="540" id="580"/>
                 <outlet property="tvbrowser" destination="549" id="557"/>
+                <outlet property="volumepop" destination="PPQ-E5-WBv" id="soO-PX-1pW"/>
                 <outlet property="warteschlaufe" destination="Y3i-9m-cLN" id="pTE-sN-88x"/>
-                <outlet property="wdtv_ok" destination="mwg-qH-coK" id="1vo-8b-vPs"/>
                 <outlet property="window" destination="371" id="532"/>
             </connections>
         </customObject>
