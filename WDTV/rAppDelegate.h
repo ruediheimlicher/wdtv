@@ -27,6 +27,8 @@
    
    NSMutableArray * Volumes_Array;
    
+   NSMutableArray * Missed_HD_Array; // fehlende HDs, sollen bei Refresh gecheckt werden
+   
    IBOutlet NSTableView* filmTable;
    NSString* filmLink;
    NSURL* filmURL;
@@ -77,6 +79,9 @@
 @property (readonly, strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
 @property (readonly, strong, nonatomic) NSManagedObjectModel *managedObjectModel;
 @property (readonly, strong, nonatomic) NSManagedObjectContext *managedObjectContext;
+
+
+
 
 @property NSIndexSet * clickset;
 @property NSString * WDTV_Pfad; // HD an WDTVLive

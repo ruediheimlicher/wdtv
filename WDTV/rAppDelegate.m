@@ -367,7 +367,8 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    // Free memory
    
 
-   
+   Missed_HD_Array = [[NSMutableArray alloc]initWithCapacity:0]; // DataSource  von TableView FilmTable
+
    
    filmArray = [[NSMutableArray alloc]initWithCapacity:0]; // DataSource  von TableView FilmTable
    wdtvArray = [[NSMutableArray alloc]initWithCapacity:0]; // files auf HD an WDTVLive
@@ -476,7 +477,9 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    // *************************************************
    // Daten auf WDTVLIVE lesen
    // *************************************************
-
+   [self RefreshFilmlisten];
+   
+   /*
  //  mountVolumeAppleScript(@"ruediheimlicher",@"rh47",@"WDTVLIVE",@"WDTV");
 
    self.WDTV_Pfad = [NSString stringWithFormat:@"/Volumes/WDTV"];
@@ -693,6 +696,8 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    {
       NSLog(@"WD_TV_B : keine TitelListe");
    }
+   */
+   
    
    
    NSLog(@"Volumes_Array: %@",Volumes_Array);
