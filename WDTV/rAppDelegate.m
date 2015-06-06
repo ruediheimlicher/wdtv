@@ -634,7 +634,21 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    TV_HD_B_Array = (NSMutableArray*)[self Film_TV_HD_B];
    
    //NSLog(@"TV_HD_B_Array: %@",TV_HD_B_Array);
-
+   if ([TV_HD_B_Array count])
+   {
+      //NSLog(@"TV_HD_B_Array: %@",TV_HD_B_Array);
+      NSString* titellistePfad=[NSHomeDirectory() stringByAppendingFormat:@"%@%@%@",@"/Documents",@"/WDTVDaten",@"/TV_HD_B_Liste.txt"];
+      NSString* titelliste = [self titelListeAusArray:TV_HD_B_Array];
+      
+      //     NSError* suc = [self writeTitelListe:titelliste toPath:titellistePfad];
+      //     NSLog(@"TV_HD_B suc: %@",suc);
+   }
+   else
+   {
+      // NSLog(@"TV_HD_B : keine TitelListe");
+   }
+   
+   
    // *************************************************
    // WD_TV_A lesen
    // *************************************************
@@ -646,9 +660,9 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    //NSLog(@"WD_TV_A_Array: %@",WD_TV_A_Array);
    if ([WD_TV_A_Array count])
    {
-      //NSLog(@"WD_TV_B_Array: %@",WD_TV_B_Array);
+      //NSLog(@"WD_TV_A_Array: %@",WD_TV_A_Array);
       NSString* titellistePfad=[NSHomeDirectory() stringByAppendingFormat:@"%@%@%@",@"/Documents",@"/WDTVDaten",@"/WD_TV_A_Liste.txt"];
-      NSString* titelliste = [self titelListeAusArray:WD_TV_B_Array];
+      NSString* titelliste = [self titelListeAusArray:WD_TV_A_Array];
       
  //     NSError* suc = [self writeTitelListe:titelliste toPath:titellistePfad];
  //     NSLog(@"WD_TV_A suc: %@",suc);
@@ -721,7 +735,11 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    NSArray* oldkellerstring = [self KellerListe];
 }
 
-- (IBAction)reportRefreshFilmlisten:(id)sender
+
+
+
+
+- (void)RefreshFilmlisten
 {
    
    //NSLog(@"app rootnode: %@",self.rootNodePath);
@@ -966,6 +984,12 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    
    //NSArray* oldkellerstring = [self KellerListe];
 }
+
+- (IBAction)reportRefreshFilmlisten:(id)sender
+{
+   [self RefreshFilmlisten];
+}
+
 
 /*
 - (NSArray*)FilmArchiv // Textfile lesen
@@ -1504,7 +1528,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
 {
    NSLog(@"TV_HD_A Pfad: %@",self.TV_HD_A_Pfad);
    
-   NSMutableArray* Film_TV_HD_AOrdner = [[NSMutableArray alloc]initWithCapacity:0];
+   NSMutableArray* Film_TV_HD_A_Ordner = [[NSMutableArray alloc]initWithCapacity:0];
    //return kellerFilmArray;
    NSFileManager *Filemanager=[NSFileManager defaultManager];
    NSError* err=NULL;
@@ -1559,12 +1583,12 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
                            for (NSURL* titel in OrdnerArray2)
                            {
                               //[sammlungArray addObject:[[titel path] lastPathComponent]];
-                              [Film_TV_HD_AOrdner addObject:[titel path]];
+                              [Film_TV_HD_A_Ordner addObject:[titel path]];
                            }
                         }
                         else
                         {
-                           [Film_TV_HD_AOrdner addObject:[unterorderurl1 path]];
+                           [Film_TV_HD_A_Ordner addObject:[unterorderurl1 path]];
                         }
                         
                      } // isDir Ordner1
@@ -1616,12 +1640,12 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
       NSLog(@"TV_HD_A nicht da");
    }
    
-   return Film_TV_HD_AOrdner;
+   return Film_TV_HD_A_Ordner;
    
 }
 - (NSArray*)Film_TV_HD_B
 {
-   NSLog(@"Film_TV_HD_B Pfad: %@",self.TV_HD_B_Pfad);
+   NSLog(@"TV_HD_B Pfad: %@",self.TV_HD_B_Pfad);
    
    NSMutableArray* Film_TV_HD_BOrdner = [[NSMutableArray alloc]initWithCapacity:0];
    //return kellerFilmArray;
@@ -2375,6 +2399,19 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    
    if (([[[filmArray objectAtIndex:0]objectForKey:@"url"]length]==0)&& ([filmArray count]==1))
    {
+      NSString *question = NSLocalizedString(@"No Film found", @"Kein Film gefunden");
+      //NSString *info = NSLocalizedString(@"Volume TV_HD_A is not mounted", @"Volume Mag auf TM ist nicht da.");
+      //NSString *retryButton = NSLocalizedString(@"Quit and try mounting", @"Quit anyway button title"); // 1000
+      //NSString *continueButton = NSLocalizedString(@"Continue ", @"Cancel button title"); // 1001
+      NSString *OKButton = NSLocalizedString(@"OK", @"OK"); // 1001
+      NSAlert *alert = [[NSAlert alloc] init];
+      [alert setMessageText:question];
+      //[alert setInformativeText:info];
+      [alert addButtonWithTitle:OKButton];
+      
+      NSInteger answer = 0;
+      answer = [alert runModal];
+
       [filmArray removeAllObjects];
       [filmTable reloadData];
       filmArray = [[NSMutableArray alloc]initWithCapacity:0];
