@@ -1971,7 +1971,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
       NSString* titellistePfad=[NSHomeDirectory() stringByAppendingFormat:@"%@%@%@%@",@"/Documents",@"/WDTVDaten",@"/FilmListen/",listname];
       NSLog(@"writeArray titellistePfad: %@",titellistePfad);
       NSError* suc = [self writeTitelListe:titelliste toPath:titellistePfad];
-      NSLog(@"WD_TV_B suc: %@",suc);
+      NSLog(@"HD von %@ suc: %@",listname,suc);
 
    }// count
    return listerror;
@@ -2004,7 +2004,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    }
    else
    {
-      NSLog(@"kein WD_TV_B_Array");
+      NSLog(@"kein Filmarchiv_Array");
    }
 
    if ([WD_TV_A_Array count])
@@ -2043,6 +2043,16 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    {
       NSLog(@"kein TV_HD_A_Array");
    }
+
+   if ([TV_HD_B_Array count])
+   {
+      [self writeArray:TV_HD_B_Array inFile:@"TV_HD_B_Liste.txt"];
+   }
+   else
+   {
+      NSLog(@"kein TV_HD_B_Array");
+   }
+
 
 }
 
@@ -2780,6 +2790,11 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
          NSString* WDTV_String = @"WD_TV_A/";
          NSString* TM_String = @"Archiv_WDTV/";
          NSString* Archiv_String = @"Filmarchiv/";
+         NSString* WD_TV_A_String = @"WD_TV_A/";
+         NSString* WD_TV_B_String = @"WD_TV_B/";
+         NSString* TV_HD_A_String = @"TV_HD_A/";
+         NSString* TV_HD_B_String = @"TV_HD_B/";
+
          
          if (([filmLink rangeOfString:WDTV_String].length))
          {
@@ -2793,6 +2808,25 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
          {
             Filmarchiv_Array =(NSMutableArray*)[self FilmArchiv];
          }
+         else if(([filmLink rangeOfString:WD_TV_A_String].length)) //
+         {
+            WD_TV_A_Array =(NSMutableArray*)[self Film_WD_TV_A];
+         }
+         else if(([filmLink rangeOfString:WD_TV_B_String].length)) //
+         {
+            WD_TV_B_Array =(NSMutableArray*)[self Film_WD_TV_B];
+         }
+         else if(([filmLink rangeOfString:TV_HD_A_String].length)) //
+         {
+            TV_HD_A_Array =(NSMutableArray*)[self Film_TV_HD_A];
+         }
+         else if(([filmLink rangeOfString:TV_HD_B_String].length)) //
+         {
+            TV_HD_B_Array =(NSMutableArray*)[self Film_TV_HD_B];
+         }
+         
+
+         
          
       }
       
@@ -2843,6 +2877,8 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
          [OKalert setMessageText:@"Film is deleted"];
          [OKalert setAlertStyle:NSWarningAlertStyle];
          [OKalert runModal];
+         
+         
          
          [filmArray removeObjectAtIndex:selektierteZeile];
          [filmTable reloadData];
@@ -3300,8 +3336,11 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    int index=0;
    // Filme auf TV_HD_A
   // NSLog(@"reportDouble Filme auf TV_HD_A");
-   
+   if ([TV_HD_A_Array count])
+   {
    NSLog(@"TV_HD_A_Array 0: %@*\n",[TV_HD_A_Array objectAtIndex:0]);
+   }
+   
    for (NSString* archivfilm in TV_HD_A_Array) // Inhalt der Files auf der externen HD
    {
          //NSLog(@"archivfilm: %@",[archivfilm lastPathComponent]);
