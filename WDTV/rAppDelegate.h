@@ -16,6 +16,7 @@
    
    NSMutableArray* filmArray; // Data Source fuer TableView FilmTable
    
+    NSMutableArray * FilmOrdnerArray;
    // Arrays fuer Filmsammlungen
    NSMutableArray * wdtvArray; // HD an WDTVLive
    NSMutableArray * magArray;
@@ -81,6 +82,7 @@
 @property (readonly, strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 
 
+@property NSMutableArray*   FilmOrdnerArray;
 
 
 @property NSIndexSet * clickset;

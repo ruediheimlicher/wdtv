@@ -267,24 +267,55 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
+   NSFileManager* fm = [NSFileManager defaultManager];
+   FilmOrdnerArray = [[NSMutableArray alloc]initWithCapacity:0]; // Order mit Pfaden zu Filmordnern auf Volumes
+
    NSArray * keys = [NSArray arrayWithObjects:NSURLVolumeURLForRemountingKey, nil];
-   NSArray * mountPaths = [[NSFileManager defaultManager] mountedVolumeURLsIncludingResourceValuesForKeys:keys options:0];
+   NSArray * mountPaths = [fm mountedVolumeURLsIncludingResourceValuesForKeys:keys options:0];
    
    NSError * error;
    NSURL * remount;
-   NSLog(@"mountPaths: %@",mountPaths);
+//   NSLog(@"mountPaths: %@",mountPaths);
    
-   for (NSURL * mountPath in mountPaths) {
-      [mountPath getResourceValue:&remount forKey:NSURLVolumeURLForRemountingKey error:&error];
-      NSLog(@"mountPath: %@ remount: %@",mountPath,remount);
-  /*
-   if(remount){
-         if ([[[NSURL URLWithString:share] host] isEqualToString:[remount host]] && [[[NSURL URLWithString:share] path] isEqualToString:[remount path]]) {
-            printf("Already mounted at %s\n", [[mountPath path] UTF8String]);
-            return 0;
+   NSArray* filmordnernamenarray = [NSArray arrayWithObjects:@"Dok",@"Krimi",@"Tatort",@"Spielfilm",@"Western", nil];
+   
+   for (NSURL * mountPath in mountPaths)
+   {
+      //NSLog(@"mountPath: %@" ,mountPath);
+      // Volumes suchen
+      if ([[mountPath path] containsString:@"Volumes"])
+      {
+         NSLog(@"Volume: %@ ",mountPath);
+         NSArray* tempVolumeArray = [fm contentsOfDirectoryAtPath:[mountPath path] error:nil];
+         if ([tempVolumeArray count])
+         {
+            //NSLog(@"tempVolumeArray: %@ ",tempVolumeArray);
+            for (NSString* pfad in tempVolumeArray)
+            {
+               if ([filmordnernamenarray containsObject:pfad])
+               {
+                  NSLog(@"pfad: %@ ",pfad);
+               }
+               else if (
+            }
          }
-   */
+         
+         
       }
+      // Do something with the path URLs.
+      
+      
+      
+      
+      /*
+       if(remount){
+       if ([[[NSURL URLWithString:share] host] isEqualToString:[remount host]] && [[[NSURL URLWithString:share] path] isEqualToString:[remount path]]) {
+       printf("Already mounted at %s\n", [[mountPath path] UTF8String]);
+       return 0;
+       }
+       */
+   }
+   NSLog(@"FilmOrdnerArray - %@",FilmOrdnerArray);
    
    
    int wert=300;
@@ -368,6 +399,8 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    
    // Free memory
    
+   
+
 
    Missed_HD_Array = [[NSMutableArray alloc]initWithCapacity:0]; // DataSource  von TableView FilmTable
 
