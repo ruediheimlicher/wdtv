@@ -238,10 +238,10 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    if ([[titelliste componentsSeparatedByString:@"\n"]count])
    {
       //NSLog(@"titelliste count:%lu",[[titelliste componentsSeparatedByString:@"\n"]count] );
-      NSString* titellistePfad=[NSHomeDirectory() stringByAppendingFormat:@"%@%@%@",@"/Documents",@"/WDTVDaten",@"/Film_HD_Liste.txt"];
+  //    NSString* titellistePfad=[NSHomeDirectory() stringByAppendingFormat:@"%@%@%@",@"/Documents",@"/WDTVDaten",@"/FilmListen",@"/Film_HD_Liste.txt"];
       
       NSURL* titellisteURL = [NSURL fileURLWithPath:pfad];
-      //NSLog(@"titellisteURL: %@",titellisteURL );
+      NSLog(@"titellisteURL: %@",titellisteURL );
       
       NSError *listerror = nil;
       NSInteger success = [titelliste writeToURL:titellisteURL
@@ -265,8 +265,6 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
 
 }
 
-
-
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
    NSArray * keys = [NSArray arrayWithObjects:NSURLVolumeURLForRemountingKey, nil];
@@ -274,16 +272,20 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    
    NSError * error;
    NSURL * remount;
-   /*
+   NSLog(@"mountPaths: %@",mountPaths);
+   
    for (NSURL * mountPath in mountPaths) {
       [mountPath getResourceValue:&remount forKey:NSURLVolumeURLForRemountingKey error:&error];
-      if(remount){
+      NSLog(@"mountPath: %@ remount: %@",mountPath,remount);
+  /*
+   if(remount){
          if ([[[NSURL URLWithString:share] host] isEqualToString:[remount host]] && [[[NSURL URLWithString:share] path] isEqualToString:[remount path]]) {
             printf("Already mounted at %s\n", [[mountPath path] UTF8String]);
             return 0;
          }
-      }
    */
+      }
+   
    
    int wert=300;
    int drittel = (((uint32_t)wert * (uint32_t)0xAAAB) >> 16) >> 1;
@@ -473,231 +475,9 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
       self.Filmarchiv_Pfad=nil;
    }
    
-   //NSLog(@"app rootnode: %@",self.rootNodePath);
-   // *************************************************
-   // Daten auf WDTVLIVE lesen
-   // *************************************************
-   [self RefreshFilmlisten];
-   
-   /*
- //  mountVolumeAppleScript(@"ruediheimlicher",@"rh47",@"WDTVLIVE",@"WDTV");
+   self.FilmListe_Pfad = [NSHomeDirectory() stringByAppendingFormat:@"%@%@%@",@"/Documents",@"/WDTVDaten",@"/FilmListen"];
+    [self RefreshFilmlisten];
 
-   self.WDTV_Pfad = [NSString stringWithFormat:@"/Volumes/WDTV"];
-   NSLog(@"WDTV_Pfad: %@",self.WDTV_Pfad);
-   
-   //NSLog(@"home: %@",NSHomeDirectory());
-    NSURL* WDTV_URL=[NSURL fileURLWithPath:self.WDTV_Pfad];
-   
-   wdtvArray = (NSMutableArray*)[self Film_WDTV];
-   //NSLog(@"wdtvArray: %@",wdtvArray );
-   NSString* wdtv_ort = self.WDTV_Pfad.lastPathComponent;
-   //NSLog(@"wdtv_ort: %@ count: %d",wdtv_ort ,wdtvArray.count);
-   
-   NSString* wdtvListe = [self titelListeAusArray:wdtvArray];
-   
-   //NSLog(@"wdtvListe: %@",wdtvListe );
-   
-   //NSLog(@"***");
-   
-   NSMutableArray* wdtvListArray = [[NSMutableArray alloc]initWithCapacity:0];
-   for (int i=0;i<wdtvArray.count;i++)
-   {
-     // NSString* tempFilmTitel = [[wdtvArray objectAtIndex:i]stringByDeletingLastPathComponent];
-      NSString* tempFilmTitel = [[[wdtvArray objectAtIndex:i] stringByReplacingOccurrencesOfString:self.WDTV_Pfad withString:@""]substringFromIndex:1];// erstes tab weg
-      
-      //NSLog(@"tempFilmTitel: %@",tempFilmTitel );
-      NSArray* tempElementeArray = [tempFilmTitel componentsSeparatedByString:@"/"]; // Am anfang steht ein /
-      
-       //NSLog(@"tempFilmTitel: %@ anz: %d",tempFilmTitel,[[tempFilmTitel componentsSeparatedByString:@"/"] count] );
-      
-      switch (tempElementeArray.count)
-      {
-         case 3: // alles vorhanden
-         {
-            NSString* tempZeilenString = [tempElementeArray componentsJoinedByString:@"\t"];
-            NSMutableDictionary* tempZeilenDic = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-                                                  
-                                                  [tempElementeArray objectAtIndex:0],@"art",
-                                                  [tempElementeArray objectAtIndex:1],@"sub",
-                                                  tempZeilenString,@"titelstring",
-                                                [tempElementeArray objectAtIndex:2],@"titel", nil];
-            [wdtvListArray addObject:tempZeilenDic];
-            
-         }break;
-         case 2:
-         {
-            NSLog(@"3 El : %@",[tempElementeArray lastObject]);
-         }break;
-         case 1:
-         {
-            NSLog(@"2 El : %@",[tempElementeArray lastObject]);
-         }break;
-         default:
-         {
-            NSLog(@"falscher Titel : %@",tempFilmTitel);
-         }break;
-      }
-   }
-   
-   NSString* ListePfad=[NSHomeDirectory() stringByAppendingFormat:@"%@%@%@",@"/Documents",@"/WDTVDaten",@"/wdtvliste.txt"];
-
-   NSURL* ListeURL = [NSURL fileURLWithPath:ListePfad];
-   
-   //NSLog(@"ListeURL: %@",ListeURL );
-   
-  
-   // *************************************************
-   // Film-Daten auf der TM lesen: File auf TM/Mag
-   // *************************************************
-   
-  // mountKellerAppleScript(@"ruediheimlicher",@"rh47",@"TC_Basis",@"Mag");
-
-   self.Mag_Pfad = [NSString stringWithFormat:@"/Volumes/Mag/Archiv_WDTV"];
-   NSLog(@"Mag_Pfad: %@",self.Mag_Pfad);
-   
-   magArray = (NSMutableArray*)[self FilmMag];
-   
-   NSString* magListe = [self titelListeAusArray:magArray];
-
-   //NSLog(@"magListe: %@",magListe );
-   if ([[magListe componentsSeparatedByString:@"\n"]count])
-   {
-      //NSLog(@"magListe count:%lu",[[magListe componentsSeparatedByString:@"\n"]count] );
-      NSString* magPfad=[NSHomeDirectory() stringByAppendingFormat:@"%@%@%@",@"/Documents",@"/WDTVDaten",@"/magliste.txt"];
-      
-      NSURL* magURL = [NSURL fileURLWithPath:magPfad];
-      //NSLog(@"magURL: %@",magURL );
-      
-    }
-   
-   //NSLog(@"write magListe: %d",magerfolg );
-
-
-   
-   
-   //NSLog(@"magArray: %@",magArray);
-   
-   // *************************************************
-   // Filmarchiv lesen
-    // *************************************************
-   
-   Filmarchiv_Array =(NSMutableArray*)[self FilmArchiv];
-   
-   if ([Filmarchiv_Array count])
-   {
-      //self.errorfeld.string = [[self.errorfeld string]stringByAppendingFormat:@"%@\n",@"Filmarchiv auf Film_HD da"];
-      //NSLog(@"filmarchivArray: %@",filmarchivArray);
-      NSString* titelliste = [self titelListeAusArray:Filmarchiv_Array];
-      
-      //NSLog(@"Filmarchiv titelliste: \n%@",titelliste );
-      if ([[titelliste componentsSeparatedByString:@"\n"]count])
-      {
-         //NSLog(@"titelliste count:%lu",[[titelliste componentsSeparatedByString:@"\n"]count] );
-         NSString* titellistePfad=[NSHomeDirectory() stringByAppendingFormat:@"%@%@%@",@"/Documents",@"/WDTVDaten",@"/Film_HD_Liste.txt"];
-         
-         NSURL* titellisteURL = [NSURL fileURLWithPath:titellistePfad];
-         //NSLog(@"titellisteURL: %@",titellisteURL );
-      }
-
-      
-   }
-   
-   
-//   mountKellerAppleScript(@"ruediheimlicher",@"rh47",@"TV_HD_A",@"Tatort");
-
-   // *************************************************
-   // TV_HD_A lesen
-   // *************************************************
-
-   //NSLog(@"*TV_HD_A_Pfad: %@",self.TV_HD_A_Pfad);
-
-   TV_HD_A_Array = (NSMutableArray*)[self Film_TV_HD_A];
-   
-   //NSLog(@"TV_HD_A_Array: %@",TV_HD_A_Array);
-   if ([TV_HD_A_Array count])
-   {
-      //NSLog(@"TV_HD_A_Array: %@",TV_HD_A_Array);
-      NSString* titellistePfad=[NSHomeDirectory() stringByAppendingFormat:@"%@%@%@",@"/Documents",@"/WDTVDaten",@"/TV_HD_A_Liste.txt"];
-      NSString* titelliste = [self titelListeAusArray:TV_HD_A_Array];
-      
-//      NSError* suc = [self writeTitelListe:titelliste toPath:titellistePfad];
-//      NSLog(@"TV_HD_A suc: %@",suc);
-   }
-   else
-   {
-      //NSLog(@"WD_TV_A : keine TitelListe");
-   }
-
-   // *************************************************
-   // TV_HD_B lesen
-   // *************************************************
-   
-   NSLog(@"TV_HD_B_Pfad: %@",self.TV_HD_B_Pfad);
-   
-   TV_HD_B_Array = (NSMutableArray*)[self Film_TV_HD_B];
-   
-   //NSLog(@"TV_HD_B_Array: %@",TV_HD_B_Array);
-   if ([TV_HD_B_Array count])
-   {
-      //NSLog(@"TV_HD_B_Array: %@",TV_HD_B_Array);
-      NSString* titellistePfad=[NSHomeDirectory() stringByAppendingFormat:@"%@%@%@",@"/Documents",@"/WDTVDaten",@"/TV_HD_B_Liste.txt"];
-      NSString* titelliste = [self titelListeAusArray:TV_HD_B_Array];
-      
-      //     NSError* suc = [self writeTitelListe:titelliste toPath:titellistePfad];
-      //     NSLog(@"TV_HD_B suc: %@",suc);
-   }
-   else
-   {
-      // NSLog(@"TV_HD_B : keine TitelListe");
-   }
-   
-   
-   // *************************************************
-   // WD_TV_A lesen
-   // *************************************************
-   
-   
-   //NSLog(@"lesen WD_TV_A_Pfad: %@",self.WD_TV_A_Pfad);
-   
-   WD_TV_A_Array = (NSMutableArray*)[self Film_WD_TV_A];
-   //NSLog(@"WD_TV_A_Array: %@",WD_TV_A_Array);
-   if ([WD_TV_A_Array count])
-   {
-      //NSLog(@"WD_TV_A_Array: %@",WD_TV_A_Array);
-      NSString* titellistePfad=[NSHomeDirectory() stringByAppendingFormat:@"%@%@%@",@"/Documents",@"/WDTVDaten",@"/WD_TV_A_Liste.txt"];
-      NSString* titelliste = [self titelListeAusArray:WD_TV_A_Array];
-      
- //     NSError* suc = [self writeTitelListe:titelliste toPath:titellistePfad];
- //     NSLog(@"WD_TV_A suc: %@",suc);
-   }
-   else
-   {
-     // NSLog(@"WD_TV_A : keine TitelListe");
-   }
-   
-   // *************************************************
-   // WD_TV_B lesen
-   // *************************************************
-   
-   
-   NSLog(@"WD_TV_B_Pfad: %@",self.WD_TV_B_Pfad);
-   
-   WD_TV_B_Array = (NSMutableArray*)[self Film_WD_TV_B];
-   if ([WD_TV_B_Array count])
-   {
-      //NSLog(@"WD_TV_B_Array: %@",WD_TV_B_Array);
-      NSString* titellistePfad=[NSHomeDirectory() stringByAppendingFormat:@"%@%@%@",@"/Documents",@"/WDTVDaten",@"/WD_TV_B_Liste.txt"];
-      NSString* titelliste = [self titelListeAusArray:WD_TV_B_Array];
-      
-//    NSError* suc = [self writeTitelListe:titelliste toPath:titellistePfad];
-//      NSLog(@"WD_TV_B suc: %@",suc);
-   }
-   else
-   {
-      NSLog(@"WD_TV_B : keine TitelListe");
-   }
-   */
-   
    
    
    NSLog(@"Volumes_Array: %@",Volumes_Array);
@@ -907,20 +687,19 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    // *************************************************
    // WD_TV_A lesen
    // *************************************************
-   
-   
    //NSLog(@"lesen WD_TV_A_Pfad: %@",self.WD_TV_A_Pfad);
    
    WD_TV_A_Array = (NSMutableArray*)[self Film_WD_TV_A];
+   
    //NSLog(@"WD_TV_A_Array: %@",WD_TV_A_Array);
    if ([WD_TV_A_Array count])
    {
       //NSLog(@"WD_TV_B_Array: %@",WD_TV_B_Array);
-      //NSString* titellistePfad=[NSHomeDirectory() stringByAppendingFormat:@"%@%@%@",@"/Documents",@"/WDTVDaten",@"/WD_TV_A_Liste.txt"];
-      //NSString* titelliste = [self titelListeAusArray:WD_TV_B_Array];
+      NSString* titellistePfad=[NSHomeDirectory() stringByAppendingFormat:@"%@%@%@",@"/Documents",@"/WDTVDaten",@"/WD_TV_A_Liste.txt"];
+      NSString* titelliste = [self titelListeAusArray:WD_TV_B_Array];
       
-      //     NSError* suc = [self writeTitelListe:titelliste toPath:titellistePfad];
-      //     NSLog(@"WD_TV_A suc: %@",suc);
+      NSError* suc = [self writeTitelListe:titelliste toPath:titellistePfad];
+      NSLog(@"WD_TV_A suc: %@",suc);
    }
    else
    {
@@ -937,12 +716,14 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    WD_TV_B_Array = (NSMutableArray*)[self Film_WD_TV_B];
    if ([WD_TV_B_Array count])
    {
-      //NSLog(@"WD_TV_B_Array: %@",WD_TV_B_Array);
-      //NSString* titellistePfad=[NSHomeDirectory() stringByAppendingFormat:@"%@%@%@",@"/Documents",@"/WDTVDaten",@"/WD_TV_B_Liste.txt"];
-      //NSString* titelliste = [self titelListeAusArray:WD_TV_B_Array];
+      NSLog(@"WD_TV_B_Array: %@",WD_TV_B_Array);
+     // NSString* titellistePfad=[NSHomeDirectory() stringByAppendingFormat:@"%@%@%@",@"/Documents",@"/WDTVDaten",@"/WD_TV_B_Liste.txt"];
+      NSString* titellistePfad=[self.FilmListe_Pfad stringByAppendingPathComponent:@"/WD_TV_B_Liste.txt"];
       
-      //    NSError* suc = [self writeTitelListe:titelliste toPath:titellistePfad];
-      //      NSLog(@"WD_TV_B suc: %@",suc);
+      NSString* titelliste = [self titelListeAusArray:WD_TV_B_Array];
+      
+      NSError* suc = [self writeTitelListe:titelliste toPath:titellistePfad];
+      NSLog(@"WD_TV_B suc: %@",suc);
    }
    else
    {
@@ -1466,14 +1247,14 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
       {
          for (NSURL* unterorderurl0 in FilmarchivOrdnerArray )
          {
-            //NSLog(@"Niveau 1 unterorderfad: %@",unterorderfad);
+            NSLog(@"Niveau 1 unterorderfad: %@",unterorderurl0);
             if([Filemanager fileExistsAtPath:[unterorderurl0 path] isDirectory:&isDir] && isDir)
             {
                NSArray* OrdnerArray1 =  [Filemanager contentsOfDirectoryAtURL:unterorderurl0
                                                    includingPropertiesForKeys:[NSArray arrayWithObject:NSURLNameKey]
                                                                       options:NSDirectoryEnumerationSkipsHiddenFiles
                                                                         error:&err];
-               //NSLog(@"OrdnerArray1: %@",[OrdnerArray1 description]);
+               NSLog(@"OrdnerArray1: %@ error: %@",[OrdnerArray1 description],err);
                
                if ([OrdnerArray1 count])
                {

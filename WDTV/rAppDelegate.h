@@ -117,6 +117,9 @@
 @property NSString * Machine_Pfad;
 @property NSString * Homedir_Pfad;
 @property NSString * Volumes_Pfad;
+
+@property NSString * FilmListe_Pfad;
+
 @property NSString * Host_Name;
 
 
