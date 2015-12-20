@@ -380,11 +380,6 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    WD_TV_B_Array = [[NSMutableArray alloc]initWithCapacity:0]; // Files auf  WD_TV_B an mini
    
    Volumes_Array = [[NSMutableArray alloc]initWithCapacity:0]; // Sichtbare Volumes
-
-   
-   
-   
-   
    
    
    [self.tvbrowser setTarget:self];
