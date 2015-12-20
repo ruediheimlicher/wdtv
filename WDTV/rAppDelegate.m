@@ -385,6 +385,8 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    
    
    
+   
+   
    [self.tvbrowser setTarget:self];
    [self.tvbrowser setColumnResizingType:NSBrowserUserColumnResizing];
    [self.tvbrowser sizeToFit];
