@@ -267,7 +267,15 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
+   
+   self.VolumesView.textColor = [NSColor greenColor];
+   self.VolumesView.editable = NO;
+   self.VolumesView.selectable = NO;
+   self.VolumesView.font = [NSFont boldSystemFontOfSize:14];
+   self.VolumesView.font = [NSFont fontWithName:@"Helvetica" size:14];
+
    NSFileManager* fm = [NSFileManager defaultManager];
+   FilmVolumesArray = [[NSMutableArray alloc]initWithCapacity:0]; // Order mit Pfaden zu Volumes mit Filmordnern
    FilmOrdnerArray = [[NSMutableArray alloc]initWithCapacity:0]; // Order mit Pfaden zu Filmordnern auf Volumes
 
    NSArray * keys = [NSArray arrayWithObjects:NSURLVolumeURLForRemountingKey, nil];
@@ -276,8 +284,8 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    NSError * error;
    NSURL * remount;
 //   NSLog(@"mountPaths: %@",mountPaths);
-   
-   NSArray* filmordnernamenarray = [NSArray arrayWithObjects:@"Archiv_Dok",@"Archiv_Krimi",@"Archiv_Tatort",@"Archiv_Spielfilm",@"Archiv_Western"@"Dok",@"Krimi",@"Tatort",@"Spielfilm",@"Western", nil];
+
+   NSArray* filmordnernamenarray = [NSArray arrayWithObjects:@"Archiv_Dok",@"Archiv_Krimi",@"Archiv_Tatort",@"Archiv_Spielfilm",@"Archiv_Western",@"Dok",@"Krimi",@"Tatort",@"Spielfilm",@"Western", nil];
    NSArray* sperrordnernamenarray = [NSArray arrayWithObjects:@"Home",@"MobileBackups", nil];
    
    for (NSURL * mountPath in mountPaths)
@@ -312,10 +320,11 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
             for (NSURL* tempURL in tempVolumeArray)
             {
                NSString* pfad = [[tempURL path] lastPathComponent ];
-              // NSLog(@"pfad: %@ ",pfad);
+               //NSLog(@"tempURL: %@\tpfad: %@ ",tempURL,pfad);
                if ([filmordnernamenarray containsObject:pfad])
                {
-                  //NSLog(@"pfad da: %@ ",pfad);
+                  
+                 // NSLog(@"pfad da: %@ ",pfad);
                   [FilmOrdnerArray addObject:tempURL];
                }
                else if ([pfad isEqualToString:@"Filmarchiv"])
@@ -356,7 +365,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
        }
        */
    }
-   NSLog(@"FilmOrdnerArray: %@",FilmOrdnerArray);
+   //NSLog(@"finishLounching FilmOrdnerArray: %@",FilmOrdnerArray);
    
    
    int wert=300;
@@ -440,7 +449,8 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    
    // Free memory
    
-   
+   self.FilmSpeicherArray = [[NSMutableArray alloc]initWithCapacity:0]; // Files auf Film_HD an mini
+
 
 
    Missed_HD_Array = [[NSMutableArray alloc]initWithCapacity:0]; // DataSource  von TableView FilmTable
@@ -454,14 +464,16 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    WD_TV_B_Array = [[NSMutableArray alloc]initWithCapacity:0]; // Files auf  WD_TV_B an mini
    
    Volumes_Array = [[NSMutableArray alloc]initWithCapacity:0]; // Sichtbare Volumes
+   Doppel_Array = [[NSMutableArray alloc]initWithCapacity:0]; // Sichtbare Volumes
+  Denied_Array = [[NSMutableArray alloc]initWithCapacity:0]; // Sichtbare Volumes
    
    
    [self.tvbrowser setTarget:self];
    [self.tvbrowser setColumnResizingType:NSBrowserUserColumnResizing];
    [self.tvbrowser sizeToFit];
-   [self.tvbrowser  setWidth:[self.tvbrowser columnWidthForColumnContentWidth:150] ofColumn:0];
+//   [self.tvbrowser  setWidth:[self.tvbrowser columnWidthForColumnContentWidth:250] ofColumn:0];
 
-   [self.tvbrowser  setWidth:[self.tvbrowser columnWidthForColumnContentWidth:150] ofColumn:1];
+   [self.tvbrowser  setWidth:[self.tvbrowser columnWidthForColumnContentWidth:250] ofColumn:1];
 
    [self.self.tvbrowser setDelegate:self];
    
@@ -512,6 +524,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    [[filmTable tableColumnWithIdentifier:@"mag"]setDataCell:movecell];
    
    self.rootNodePath = @"/Volumes/WD_TV_B";
+   
    //self.rootNodePath = @"/Volumes/WDTV";
    
    if ([_Host_Name isEqualToString:@"ruediheimlicher.local"])
@@ -549,11 +562,13 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    }
    
    self.FilmListe_Pfad = [NSHomeDirectory() stringByAppendingFormat:@"%@%@%@",@"/Documents",@"/WDTVDaten",@"/FilmListen"];
-    [self RefreshFilmlisten];
+   
+   [self RefreshFilmlisten];
 
    
    
-   NSLog(@"Volumes_Array: %@",Volumes_Array);
+   //NSLog(@"Volumes_Array: %@",Volumes_Array);
+   
    [self.volumepop removeAllItems];
    [self.volumepop addItemsWithTitles:[Volumes_Array valueForKey:@"volume"]];
    //[self.volumepop selectItemAtIndex:[Volumes_Array count]-1];
@@ -576,7 +591,6 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    
    NSURLConnection* uploadConnection =[[NSURLConnection alloc] initWithRequest:urlRequest delegate:self];
   
-
    // *************************************************
  
    NSNotificationCenter * nc;
@@ -590,16 +604,15 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    [self.warteschlaufe setHidden:YES];
    
    
-   NSArray* oldkellerstring = [self KellerListe];
+   //NSString* oldkellerstring = [self KellerListe];
 }
 
 
 
 
-
+// Volumes nach filmlisten absuchen
 - (void)RefreshFilmlisten
 {
-   
    //NSLog(@"app rootnode: %@",self.rootNodePath);
    // *************************************************
    // Daten auf WDTVLIVE lesen
@@ -639,6 +652,11 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
       
       switch (tempElementeArray.count)
       {
+         case 4:
+         {
+            NSLog(@"4 Elemente : %@",tempFilmTitel);
+         
+         }
          case 3: // alles vorhanden
          {
             NSString* tempZeilenString = [tempElementeArray componentsJoinedByString:@"\t"];
@@ -661,7 +679,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
          }break;
          default:
          {
-            NSLog(@"falscher Titel : %@",tempFilmTitel);
+            NSLog(@"refreshFilmListen falscher Titel: %@",tempFilmTitel);
          }break;
       }
    }
@@ -671,6 +689,75 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    NSURL* ListeURL = [NSURL fileURLWithPath:ListePfad];
    
    //NSLog(@"ListeURL: %@",ListeURL );
+   
+  
+   if (FilmOrdnerArray.count)
+   {
+      NSLog(@"RefreshFilmlisten FilmOrdnerArray: %@",FilmOrdnerArray);
+
+      //NSLog(@"FilmOrdnerArray da");
+      
+      for (NSURL* tempURL in FilmOrdnerArray)
+      {
+         //NSLog(@"tempURL: %@",tempURL);
+         
+         NSString* tempOrdner = [[tempURL path]lastPathComponent];
+          NSString* tempVolumeA = [[tempURL path]stringByDeletingLastPathComponent];
+          //NSLog(@"tempVolumeA: %@",tempVolumeA);
+         NSString* tempVolumeB = [[[tempURL path]stringByDeletingLastPathComponent] stringByAppendingPathComponent:tempOrdner];
+          //NSLog(@"tempVolumeB: %@",tempVolumeB);
+         
+ //        NSArray* tempFilmArray =[self FilmarrayVonURL:[tempURL URLByDeletingLastPathComponent]];
+ //        NSArray* tempFilmArray =[self FilmarrayVonURL:[[tempURL URLByDeletingLastPathComponent] URLByAppendingPathComponent:tempOrdner]];
+         //NSArray* tempFilmArray =[self FilmarrayVonGenreURL:[[tempURL URLByDeletingLastPathComponent] URLByAppendingPathComponent:tempOrdner]];
+        
+         
+         NSArray* tempFilmArray =[self FilmarrayVonGenreURL:tempURL];
+
+         
+         if ([tempFilmArray count])
+         {
+//            NSLog(@"tempFilmArray: %@",tempFilmArray);
+         
+            [self.FilmSpeicherArray addObject: [NSDictionary dictionaryWithObject:tempFilmArray forKey:[tempURL path]]];
+         }
+         
+      }
+   }
+   else
+   {
+      NSLog(@"RefreshFilmlisten FilmOrdnerArrayist leer");
+
+   }
+//   NSLog(@"FilmSpeicherArray: %@",self.FilmSpeicherArray);
+   
+   NSString* titelString = [self titelListeAusFilmListe:self.FilmSpeicherArray];
+   NSLog(@"titelString: %@",titelString);
+   if ([self.FilmSpeicherArray count])
+   {
+
+   NSError* err;
+   NSString* filmlistePfad=[NSHomeDirectory() stringByAppendingFormat:@"%@%@%@",@"/Documents",@"/WDTVDaten",@"/Film_Liste.txt"];
+
+   //BOOL suc = [self.FilmSpeicherArray writeToFile: filmspeicherlistePfad atomically:YES];
+   BOOL suc = [titelString writeToFile: filmlistePfad atomically:YES encoding:NSMacOSRomanStringEncoding error:&err];
+   NSLog(@"write FilmSpeicherArray suc: %d error: *%@*",suc,err);
+
+   
+   
+      //NSLog(@"self.FilmSpeicherArray count: %d",[self.FilmSpeicherArray count]);
+      NSString* filmspeicherlistePfad=[NSHomeDirectory() stringByAppendingFormat:@"%@%@%@",@"/Documents",@"/WDTVDaten",@"/FilmSpeicher_Liste.txt"];
+      //NSString* titelliste = [self titelListeAusArray:self.FilmSpeicherArray];
+      
+   }
+   else
+   {
+      NSLog(@"RefreshFilmlisten: FilmSpeicherArray ist leer");
+   }
+
+   
+   return;
+   
    
    
    // *************************************************
@@ -807,11 +894,13 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    //NSLog(@"Volumes_Array: %@",Volumes_Array);
    [self.volumepop removeAllItems];
    [self.volumepop addItemsWithTitles:[Volumes_Array valueForKey:@"volume"]];
+   
    //[self.volumepop selectItemAtIndex:4];
    // *************************************************
    // upload liste
    // Quelle: http://www.geronimobile.com/sending-image-from-xcode-to-server/
    //NSString *urlString = @"http://www.ruediheimlicher.ch/cgi-bin/wdtvlist.pl";
+   
    NSString *urlString = @"http://www.ruediheimlicher.ch/Data";
    
    NSString * theString=@"e88d";
@@ -898,7 +987,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    {
       //NSString* tempFilmTitel = [[derFilmArray objectAtIndex:i]stringByDeletingLastPathComponent];
       NSString* tempFilm = [derFilmArray objectAtIndex:i]; // WD_TV_A		Volumes	WD_TV_A	Tatort	Mag	Tatort 130323 Summ, Summ, Summ.mpg
-     //NSString* tempFilmTitel = [[[filmArray objectAtIndex:i] stringByReplacingOccurrencesOfString:self.WDTV_Pfad withString:@""]substringFromIndex:1];// erstes tab weg
+      //NSString* tempFilmTitel = [[[filmArray objectAtIndex:i] stringByReplacingOccurrencesOfString:self.WDTV_Pfad withString:@""]substringFromIndex:1];// erstes tab weg
       
       //NSLog(@"tempFilmTitel: %@",tempFilm );
       NSArray* tempElementeArray = [tempFilm componentsSeparatedByString:@"/"]; // Am anfang steht ein /
@@ -938,8 +1027,14 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
                                                   tempZeilenString,@"titelstring",
                                                   [tempElementeArray objectAtIndex:4],@"titel", nil];
             [ListeArray addObject:tempZeilenDic];
-
+            
          }break;
+         case 4:
+         {
+            NSLog(@" titelListeAusArray 4 Elemente : %@",tempElementeArray);
+            
+         }
+
          case 2:
          {
             NSLog(@"3 El : %@",[tempElementeArray lastObject]);
@@ -955,11 +1050,221 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
       }
    }
    
-  // NSLog(@"ListeArray: %@",ListeArray );
+   // NSLog(@"ListeArray: %@",ListeArray );
    NSString* Liste = [NSString string];
    for (int i=0;i<ListeArray.count;i++)
    {
       Liste = [Liste stringByAppendingFormat:@"%@\t%@\n",[[ListeArray objectAtIndex:i]objectForKey:@"ort"],[[ListeArray objectAtIndex:i]objectForKey:@"titelstring"]];
+   }
+   //NSLog(@"  ++  end titelListe");
+   
+   return Liste;
+   
+   
+}
+
+- (NSString*)titelListeAusFilmListe:(NSArray*)derFilmArray
+{
+   //NSLog(@"  ++  start titelListe");
+   NSMutableArray* ListeArray = [[NSMutableArray alloc]initWithCapacity:0];
+
+   NSMutableArray* TitelArray = [[NSMutableArray alloc]initWithCapacity:0];
+
+   for (int i=0;i < derFilmArray.count;i++)
+   {
+      //NSString* tempFilmTitel = [[derFilmArray objectAtIndex:i]stringByDeletingLastPathComponent];
+      
+      NSDictionary* tempFilmDic = [derFilmArray objectAtIndex:i];
+      
+      NSArray* temprawTitelArray = tempFilmDic.allValues;
+      NSArray* tempTitelArray = [temprawTitelArray objectAtIndex:0];
+
+      // Titel filtern
+      
+      for (int k=0;k<tempTitelArray.count;k++)
+      {
+         
+         NSString* tempFilm = [tempTitelArray objectAtIndex:k]; // WD_TV_A		Volumes	WD_TV_A	Tatort	Mag	Tatort 130323 Summ, Summ, Summ.mpg
+         //NSString* tempFilmTitel = [[[filmArray objectAtIndex:i] stringByReplacingOccurrencesOfString:self.WDTV_Pfad withString:@""]substringFromIndex:1];// erstes tab weg
+         
+         //NSLog(@"tempFilmTitel: %@",tempFilm );
+         NSArray* tempElementeArray = [tempFilm componentsSeparatedByString:@"/"]; // Am anfang steht ein /
+         
+         if ([[tempElementeArray objectAtIndex:1] isEqualToString:@"Volumes"])
+         {
+            tempElementeArray = [tempElementeArray subarrayWithRange:NSMakeRange(1, [tempElementeArray count]-1)];
+         }
+         //NSLog(@"tempFilmTitel: %@ anz: %d",tempFilm,[tempElementeArray count] );
+         
+         NSString* kontrolltitel = [[tempElementeArray lastObject]stringByDeletingPathExtension];
+         
+         
+         switch (tempElementeArray.count)
+         {
+            case 6: // alles vorhanden
+            {
+               NSString* tempZeilenString = [[tempElementeArray subarrayWithRange:NSMakeRange(3, 3)]componentsJoinedByString:@"\t"];
+          //     NSLog(@"6 El : %@",[tempElementeArray lastObject]);
+               NSMutableDictionary* tempZeilenDic = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                                     [tempElementeArray objectAtIndex:2],@"ort",
+                                                     [tempElementeArray objectAtIndex:3],@"art",
+                                                     [tempElementeArray objectAtIndex:4],@"sub",
+                                                     tempZeilenString,@"titelstring",
+                                                     [tempElementeArray objectAtIndex:5],@"titel",
+                                                     tempFilm,@"film",nil];
+               
+               NSString* titelteil = [[tempElementeArray objectAtIndex:5]stringByDeletingPathExtension];
+               [TitelArray addObject:titelteil];
+               NSString* titelnummer =0;
+               //NSLog(@"Titel raw: %@",[[tempElementeArray objectAtIndex:5]stringByDeletingPathExtension]);
+               
+               [ListeArray addObject:tempZeilenDic];
+               
+            }break;
+               
+            case 5:// ohne Jahrzahl
+            {
+               NSString* tempZeilenString = [[tempElementeArray subarrayWithRange:NSMakeRange(2, 3)]componentsJoinedByString:@"\t"];
+               //NSLog(@"tempElementeArray: %@ tempZeilenString: %@", tempElementeArray, tempZeilenString);
+         //      NSLog(@"5 El : %@",[tempElementeArray lastObject]);
+               NSString* titelteil = [[tempElementeArray objectAtIndex:4]stringByDeletingPathExtension];
+               [TitelArray addObject:titelteil];
+               
+               NSMutableDictionary* tempZeilenDic = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                                     [tempElementeArray objectAtIndex:1],@"ort",
+                                                     [tempElementeArray objectAtIndex:2],@"art",
+                                                     [tempElementeArray objectAtIndex:3],@"sub",
+                                                     tempZeilenString,@"titelstring",
+                                                     [tempElementeArray objectAtIndex:4],@"titel",
+                                                     tempFilm,@"film",nil];
+               [ListeArray addObject:tempZeilenDic];
+               
+            }break;
+            case 4:// ohne Jahrzahl
+            {
+               
+               NSString* tempZeilenString = [[tempElementeArray subarrayWithRange:NSMakeRange(1, 3)]componentsJoinedByString:@"\t"];
+               //NSLog(@"tempElementeArray: %@ tempZeilenString: %@", tempElementeArray, tempZeilenString);
+         //      NSLog(@"4 El : %@",[tempElementeArray lastObject]);
+               NSString* titelteil = [[tempElementeArray lastObject]stringByDeletingPathExtension];
+               [TitelArray addObject:titelteil];
+               
+               NSMutableDictionary* tempZeilenDic = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                                     [tempElementeArray objectAtIndex:1],@"ort",
+                                                     [tempElementeArray objectAtIndex:2],@"art",
+                                                     [tempElementeArray objectAtIndex:3],@"sub",
+                                                     tempZeilenString,@"titelstring",
+                                                     [tempElementeArray objectAtIndex:3],@"titel",
+                                                     tempFilm,@"film",nil];
+               [ListeArray addObject:tempZeilenDic];
+               
+            }break;
+
+            case 2:
+            {
+               NSLog(@"3 El : %@",[tempElementeArray lastObject]);
+            }break;
+            case 1:
+            {
+               NSLog(@"2 El : %@",[tempElementeArray lastObject]);
+            }break;
+            default:
+            {
+               NSLog(@"titelListeAusFilmListe falscher Titel: %@",tempFilm);
+            }break;
+         }// switch
+      } // for k
+   }// for i
+   
+  //NSLog(@"TitelArray count: %d: \n%@",[TitelArray count],TitelArray );
+   NSString* Liste = [NSString string];
+   
+ 
+   
+   for (int i=0;i<ListeArray.count;i++)
+   {
+      NSString* temptitelstring = [[ListeArray objectAtIndex:i]objectForKey:@"titelstring"];
+      NSArray* temparray =[[[ListeArray objectAtIndex:i]objectForKey:@"titelstring"]componentsSeparatedByString:@" "];
+      if ([temparray count]>4)
+      {
+      temparray = [temparray subarrayWithRange:NSMakeRange(1, [temparray count]-1)];
+      }
+      
+      temptitelstring = [temparray componentsJoinedByString:@" "];
+      for (NSString* st in temparray)
+      {
+         if ([Liste containsString:st])
+         {
+            //NSLog(@"Wort %@ schon da",st);
+         }
+      }
+      
+      
+      if ([Liste containsString:temptitelstring])
+      
+         
+      {
+         NSLog(@"Titel schon da: %@",temptitelstring);
+         NSString* doppelpfad = [[[[@"/Volumes"stringByAppendingPathComponent:[[ListeArray objectAtIndex:i]objectForKey:@"ort"]]
+                                  stringByAppendingPathComponent:[[ListeArray objectAtIndex:i]objectForKey:@"art"]]
+                                 stringByAppendingPathComponent:[[ListeArray objectAtIndex:i]objectForKey:@"sub"]]
+                                 stringByAppendingPathComponent:[[ListeArray objectAtIndex:i]objectForKey:@"titel"]]
+                                 ;
+         NSLog(@"doppelpfad: %@",doppelpfad);
+         doppelpfad =[[ListeArray objectAtIndex:i]objectForKey:@"film"];
+         NSLog(@"doppelpfad neu: %@",doppelpfad);
+
+         if ([[NSFileManager defaultManager]fileExistsAtPath:doppelpfad])
+         {
+            NSLog(@"file an pfad %@ ist da",doppelpfad);
+            NSString *question = NSLocalizedString(@"Double Film", @"Doppelter Film");
+            NSString *info = doppelpfad ;
+            NSString *deleteButton = NSLocalizedString(@"Delete", @"Loeschen");
+
+            NSString *continueButton = NSLocalizedString(@"Ignore", @"Ignorieren");
+            NSAlert *alert = [[NSAlert alloc] init];
+            [alert setMessageText:question];
+            [alert setInformativeText:info];
+            [alert addButtonWithTitle:deleteButton];
+            [alert addButtonWithTitle:continueButton];
+            NSInteger answer = 0;
+            answer = [alert runModal];
+            //NSLog(@"kein WD_TV_A answer: %d NSAlertAlternateReturn: %d",(int)answer, NSAlertAlternateReturn);
+            if (answer == 1000) // 1000, delete
+            {
+               NSLog(@"delete  : %d",(int)answer);
+               //[NSApp terminate:self];
+               {
+                  NSError* err;
+                  BOOL suc = [[NSFileManager defaultManager]removeItemAtPath:doppelpfad error:&err];
+                  NSLog(@"file an pfad %@ ist weg:suc: %d err: %@",doppelpfad,suc,err);
+                  if (suc == 0)
+                  {
+                     [Denied_Array addObject:doppelpfad];
+                  }
+               
+               }
+             
+            }
+            else if(answer == 1001) // 1001,nichts tun
+            {
+               NSLog(@"nichts tun : %d",(int)answer);
+            }
+            
+         }
+         [Doppel_Array addObject:[[ListeArray objectAtIndex:i]objectForKey:@"film"]];
+      }
+//      Liste = [Liste stringByAppendingFormat:@"%@\t%@\n",[[ListeArray objectAtIndex:i]objectForKey:@"ort"],[[ListeArray objectAtIndex:i]objectForKey:@"titelstring"]];
+      Liste = [Liste stringByAppendingFormat:@"%@\n",[[ListeArray objectAtIndex:i]objectForKey:@"film"]];
+   }
+   //NSLog(@"Liste: \n%@",Liste);
+   if ([Doppel_Array count])
+   {
+      NSLog(@"titelListeAusFilmListe Doppel_Array: \n%@",Doppel_Array);
+   }
+   if ([Denied_Array count])
+   {
+   NSLog(@"titelListeAusFilmListe Denied_Array: \n%@",Denied_Array);
    }
    //NSLog(@"  ++  end titelListe");
 
@@ -1080,8 +1385,6 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
 {
    NSMutableArray* tempFilmArray = [[NSMutableArray alloc]initWithCapacity:0];
    NSFileManager *Filemanager=[NSFileManager defaultManager];
-   NSError* err=NULL;
-   NSURL* Keller_URL=[NSURL fileURLWithPath:pfad];
    if ([Filemanager fileExistsAtPath:pfad])//ist
    {
       NSLog(@"FilmeAnPfad: Filme sind da an Pfad %@",pfad);
@@ -1090,16 +1393,16 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
       //NSArray* tempOrdnerArray = [Filemanager contentsOfDirectoryAtPath:self.Mag_Pfad error:&err];
       //NSLog(@"err: %@ ArchivOrdnerArray: %@",err,[tempOrdnerArray description]);
       //NSArray* KellerOrdnerArray=  [Filemanager contentsOfDirectoryAtPath:self.Mag_Pfad error:&err];
-      NSArray* FilmOrdnerArray=  [Filemanager contentsOfDirectoryAtURL:[NSURL fileURLWithPath:pfad]
+      NSArray* tempFilmOrdnerArray=  [Filemanager contentsOfDirectoryAtURL:[NSURL fileURLWithPath:pfad]
                                               includingPropertiesForKeys:[NSArray arrayWithObject:NSURLNameKey]
                                                                  options:NSDirectoryEnumerationSkipsHiddenFiles
                                                                    error:&err];
-      NSLog(@"FilmeAnPfad FilmOrdnerArray: %@",FilmOrdnerArray);
+      NSLog(@"FilmeAnPfad tempFilmOrdnerArray: %@",tempFilmOrdnerArray);
       
       BOOL isDir;
-      if ([FilmOrdnerArray count])
+      if ([tempFilmOrdnerArray count])
       {
-         for (NSURL* unterorderurl0 in FilmOrdnerArray )
+         for (NSURL* unterorderurl0 in tempFilmOrdnerArray )
          {
             //NSLog(@"FilmeAnPfad Niveau 1 unterorderfad: %@",unterorderurl0);
             if([Filemanager fileExistsAtPath:[unterorderurl0 path] isDirectory:&isDir] && isDir)
@@ -1382,11 +1685,314 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    
 }
 
+- (NSArray*)FilmarrayVonGenreURL:(NSURL*)Genre_URL
+{
+   {
+   //   NSLog(@"\n****\tFilmarrayVonGenreURL URL: %@",Genre_URL);
+      
+      NSMutableArray* Film_Ordner = [[NSMutableArray alloc]initWithCapacity:0];
+      
+      
+      NSFileManager *Filemanager=[NSFileManager defaultManager];
+      NSError* err=NULL;
+      
+      if ([Filemanager fileExistsAtPath:[Genre_URL path]])//ist vorhanden
+      {
+         NSArray* pfadcomponentenarray =[[Genre_URL path]componentsSeparatedByString:@"/"];// Pfadkomponenten
+         
+         // Genre_URL: /Volumes/HD_XY/Genre_xy oder /Volumes/HD_UV/Filmarchiv/Genre_xy
+         NSString* filmDir = [Genre_URL path];
+         NSString* filmVolume = [[[Genre_URL path]stringByDeletingLastPathComponent ]lastPathComponent]; //
+         if ([filmDir containsString:@"Filmarchiv"])
+         {
+            // Volume ist eine Ebene hoeher, Filmarchiv abschneiden
+            filmVolume = [[[[Genre_URL path]stringByDeletingLastPathComponent ]stringByDeletingLastPathComponent ]lastPathComponent];
+         }
+         else
+         {
+         
+           // filmVolume = [[[Genre_URL path]stringByDeletingLastPathComponent ]lastPathComponent]; //
+         }
+    //     NSLog(@"Genre_URL: %@ filmVolume: %@",Genre_URL,filmVolume);
+         [Volumes_Array addObject:[NSDictionary dictionaryWithObjectsAndKeys:[Genre_URL path] , @"path",filmVolume,@"volume", nil]];
+         NSString* tempVolumesString = [self.VolumesView string];
+         
+         if ([tempVolumesString length])
+         {
+            if (![tempVolumesString containsString:filmVolume])
+            {
+               NSString* volumetext =[NSString stringWithFormat:@"%@\n%@",tempVolumesString,filmVolume];
+               self.VolumesView.string = volumetext;
+               self.errorfeld.string = [[self.errorfeld string]stringByAppendingFormat:@"%@ da\n",filmVolume ];
+            }
+         }
+         else
+         {
+            self.VolumesView.string = filmVolume;
+            
+         }
+         
+         
+         //NSLog(@"TV_HD_A da");
+         NSError* err;
+         
+         NSArray* HD_OrdnerArray=  [Filemanager contentsOfDirectoryAtURL:Genre_URL
+                                              includingPropertiesForKeys:[NSArray arrayWithObject:NSURLNameKey]
+                                                                 options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                   error:&err];
+         //NSLog(@"HD_OrdnerArray: %@",HD_OrdnerArray);
+         
+         BOOL isDir;
+         if ([HD_OrdnerArray count])
+         {
+            for (NSURL* unterorderurl0 in HD_OrdnerArray )
+            {
+               //NSLog(@"Niveau 1 unterorderfad: %@",unterorderurl0);
+               if([Filemanager fileExistsAtPath:[unterorderurl0 path] isDirectory:&isDir])
+               {
+                  // AAA
+                  if (isDir) // Unterordner da (mag, intern)
+                  {
+                     NSArray* OrdnerArray1 =  [Filemanager contentsOfDirectoryAtURL:unterorderurl0
+                                                         includingPropertiesForKeys:[NSArray arrayWithObject:NSURLNameKey]
+                                                                            options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                              error:&err];
+                     //NSLog(@"OrdnerArray1: %@",[OrdnerArray1 description]);
+                     
+                     if ([OrdnerArray1 count])
+                     {
+                        for (NSURL* unterorderurl1 in OrdnerArray1 )
+                        {
+                           //NSLog(@"Niveau 2 unterorderfad: %@",[unterorderurl1 path]);
+                           if([Filemanager fileExistsAtPath:[unterorderurl1 path] isDirectory:&isDir] )
+                           {
+                              //NSLog(@"Niveau 2 File da");
+                              if (isDir)
+                              {
+                                 NSLog(@"Niveau 2 Dir da");
+                                 NSArray* OrdnerArray2 =  [Filemanager contentsOfDirectoryAtURL:unterorderurl1
+                                                                     includingPropertiesForKeys:[NSArray arrayWithObject:NSURLNameKey]
+                                                                                        options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                                          error:&err];
+                                 NSLog(@"OrdnerArray2: %@",OrdnerArray2);
+                                 for (NSURL* titel in OrdnerArray2)
+                                 {
+                                    //[sammlungArray addObject:[[titel path] lastPathComponent]];
+                                    [Film_Ordner addObject:[titel path]];
+                                 }
+                              }
+                              else
+                              {
+                                 [Film_Ordner addObject:[unterorderurl1 path]];
+                              }
+                              
+                           } // isDir Ordner1
+                           
+                        } // for order1 count
+                        
+                     }// orderarray1 count
+                  } // isDir in Order0
+                  //
+                  else // Filme
+                  {
+                     [Film_Ordner addObject:[unterorderurl0 path]];
+                  }
+               }
+               
+            } // for order0
+            
+         }// orderarray0
+         //NSLog(@"FilmarchivOrdner: %@",[FilmarchivOrdner description]);
+         [self.tvbrowser loadColumnZero];
+         
+      }
+      else
+      {
+         if ([_Host_Name isEqualToString:@"ruediheimlicher.home"])
+         {
+            NSString *question = NSLocalizedString(@"Source for Films", @"Daten für Quelle");
+            NSString *info = NSLocalizedString(@"Volume TV_HD_A is not mounted", @"Volume TV_HD_A ist nicht da.");
+            NSString *retryButton = NSLocalizedString(@"Quit and try mounting", @"Quit anyway button title"); // 1000
+            NSString *continueButton = NSLocalizedString(@"Continue ", @"Cancel button title"); // 1001
+            NSAlert *alert = [[NSAlert alloc] init];
+            [alert setMessageText:question];
+            [alert setInformativeText:info];
+            [alert addButtonWithTitle:retryButton];
+            [alert addButtonWithTitle:continueButton];
+            NSInteger answer = 0;
+            //      answer = [alert runModal];
+            //      NSLog(@"keine TV_HD_A answer: %d NSAlertAlternateReturn: %d",(int)answer, NSAlertAlternateReturn);
+            if (answer == 1000) // 1000, quit
+            {
+               NSLog(@"keine TV_HD_A NSAlertAlternateReturn, quit  : %d",(int)answer);
+               [NSApp terminate:self];
+               
+            }
+            else if(answer == 1001) // 1001,nichts tun
+            {
+               NSLog(@"keine TV_HD_A NSAlertDefaultReturn, nichts tun : %d",(int)answer);
+            }
+         }
+         self.TV_HD_A_OK_Feld.enabled=0;
+         self.TV_HD_A_OK_Feld.backgroundColor = [NSColor lightGrayColor];
+         self.TV_HD_A_OK = [NSNumber numberWithBool:NO];
+         self.errorfeld.string = [[self.errorfeld string]stringByAppendingFormat:@"%@\n",@"TV_HD_A nicht da" ];
+         
+         NSLog(@"FilmarrayVonURL %@ nicht da",Genre_URL);
+      }
+      //NSLog(@"Film_Ordner: %@",Film_Ordner );
+      
+      return Film_Ordner;
+      
+   }
+}
+
+
+- (NSArray*)FilmarrayVonURL:(NSURL*)HD_URL
+{
+   NSLog(@"FilmarrayVonURL URL: %@",HD_URL);
+   
+   NSMutableArray* Film_Ordner = [[NSMutableArray alloc]initWithCapacity:0];
+   
+   
+   NSFileManager *Filemanager=[NSFileManager defaultManager];
+   NSError* err=NULL;
+
+   if ([Filemanager fileExistsAtPath:[HD_URL path]])//ist
+   {
+      NSString* filmVolume = [[HD_URL path] lastPathComponent];
+      NSLog(@"HD_URL: %@ filmVolume: %@",HD_URL,filmVolume);
+      [Volumes_Array addObject:[NSDictionary dictionaryWithObjectsAndKeys:[HD_URL path] , @"path",filmVolume,@"volume", nil]];
+      self.TV_HD_A_OK = [NSNumber numberWithBool:YES];
+      
+      self.TV_HD_A_OK_Feld.enabled=1;
+      self.TV_HD_A_OK_Feld.backgroundColor = [NSColor greenColor];
+      NSString* tempVolumesString = [self.VolumesView string];
+      
+      if ([tempVolumesString length])
+      {
+         if (![tempVolumesString containsString:filmVolume])
+         {
+            NSString* volumetext =[NSString stringWithFormat:@"%@\n%@",tempVolumesString,filmVolume];
+            self.VolumesView.string = volumetext;
+            self.errorfeld.string = [[self.errorfeld string]stringByAppendingFormat:@"%@ da\n",filmVolume ];
+         }
+      }
+      else
+      {
+        self.VolumesView.string = filmVolume;
+
+      }
+      
+      
+      //NSLog(@"TV_HD_A da");
+      NSError* err;
+
+      NSArray* HD_OrdnerArray=  [Filemanager contentsOfDirectoryAtURL:HD_URL
+                                                includingPropertiesForKeys:[NSArray arrayWithObject:NSURLNameKey]
+                                                                   options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                     error:&err];
+      //NSLog(@"HD_OrdnerArray: %@",HD_OrdnerArray);
+      
+      BOOL isDir;
+      if ([HD_OrdnerArray count])
+      {
+         for (NSURL* unterorderurl0 in HD_OrdnerArray )
+         {
+            //NSLog(@"Niveau 1 unterorderfad: %@",unterorderfad);
+            if([Filemanager fileExistsAtPath:[unterorderurl0 path] isDirectory:&isDir] && isDir)
+            {
+               NSArray* OrdnerArray1 =  [Filemanager contentsOfDirectoryAtURL:unterorderurl0
+                                                   includingPropertiesForKeys:[NSArray arrayWithObject:NSURLNameKey]
+                                                                      options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                        error:&err];
+               //NSLog(@"OrdnerArray1: %@",[OrdnerArray1 description]);
+               
+               if ([OrdnerArray1 count])
+               {
+                  for (NSURL* unterorderurl1 in OrdnerArray1 )
+                  {
+                     //NSLog(@"Niveau 2 unterorderfad: %@",[unterorderurl1 path]);
+                     if([Filemanager fileExistsAtPath:[unterorderurl1 path] isDirectory:&isDir] )
+                     {
+                        //NSLog(@"Niveau 2 File da");
+                        if (isDir)
+                        {
+                           NSArray* OrdnerArray2 =  [Filemanager contentsOfDirectoryAtURL:unterorderurl1
+                                                               includingPropertiesForKeys:[NSArray arrayWithObject:NSURLNameKey]
+                                                                                  options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                                    error:&err];
+                           //NSLog(@"OrdnerArray2: %@",OrdnerArray2);
+                           for (NSURL* titel in OrdnerArray2)
+                           {
+                              //[sammlungArray addObject:[[titel path] lastPathComponent]];
+                              [Film_Ordner addObject:[titel path]];
+                           }
+                        }
+                        else
+                        {
+                           [Film_Ordner addObject:[unterorderurl1 path]];
+                        }
+                        
+                     } // isDir Ordner1
+                     
+                  } // for order1 count
+                  
+               }// orderarray1 count
+            } // isDir in Order0
+            
+         } // for order0
+         
+      }// orderarray0
+      //NSLog(@"FilmarchivOrdner: %@",[FilmarchivOrdner description]);
+      [self.tvbrowser loadColumnZero];
+      
+   }
+   else
+   {
+      if ([_Host_Name isEqualToString:@"ruediheimlicher.home"])
+      {
+         NSString *question = NSLocalizedString(@"Source for Films", @"Daten für Quelle");
+         NSString *info = NSLocalizedString(@"Volume TV_HD_A is not mounted", @"Volume TV_HD_A ist nicht da.");
+         NSString *retryButton = NSLocalizedString(@"Quit and try mounting", @"Quit anyway button title"); // 1000
+         NSString *continueButton = NSLocalizedString(@"Continue ", @"Cancel button title"); // 1001
+         NSAlert *alert = [[NSAlert alloc] init];
+         [alert setMessageText:question];
+         [alert setInformativeText:info];
+         [alert addButtonWithTitle:retryButton];
+         [alert addButtonWithTitle:continueButton];
+         NSInteger answer = 0;
+         //      answer = [alert runModal];
+         //      NSLog(@"keine TV_HD_A answer: %d NSAlertAlternateReturn: %d",(int)answer, NSAlertAlternateReturn);
+         if (answer == 1000) // 1000, quit
+         {
+            NSLog(@"keine TV_HD_A NSAlertAlternateReturn, quit  : %d",(int)answer);
+            [NSApp terminate:self];
+            
+         }
+         else if(answer == 1001) // 1001,nichts tun
+         {
+            NSLog(@"keine TV_HD_A NSAlertDefaultReturn, nichts tun : %d",(int)answer);
+         }
+      }
+      self.TV_HD_A_OK_Feld.enabled=0;
+      self.TV_HD_A_OK_Feld.backgroundColor = [NSColor lightGrayColor];
+      self.TV_HD_A_OK = [NSNumber numberWithBool:NO];
+      self.errorfeld.string = [[self.errorfeld string]stringByAppendingFormat:@"%@\n",@"TV_HD_A nicht da" ];
+      
+      NSLog(@"FilmarrayVonURL %@ nicht da",HD_URL);
+   }
+   //NSLog(@"Film_Ordner: %@",Film_Ordner );
+
+   return Film_Ordner;
+   
+}
 
 - (NSArray*)Film_TV_HD_A
 {
-   NSLog(@"TV_HD_A Pfad: %@",self.TV_HD_A_Pfad);
-   
+   NSLog(@"TV_HD_A Pfad: %@ URL: %@",self.TV_HD_A_Pfad,[NSURL fileURLWithPath:self.TV_HD_A_Pfad]);
+   return [self FilmarrayVonURL:[NSURL fileURLWithPath:self.TV_HD_A_Pfad]];
+           
    NSMutableArray* Film_TV_HD_A_Ordner = [[NSMutableArray alloc]initWithCapacity:0];
    //return kellerFilmArray;
    NSFileManager *Filemanager=[NSFileManager defaultManager];

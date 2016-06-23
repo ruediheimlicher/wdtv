@@ -16,7 +16,8 @@
    
    NSMutableArray* filmArray; // Data Source fuer TableView FilmTable
    
-    NSMutableArray * FilmOrdnerArray;
+   NSMutableArray * FilmVolumesArray;
+   NSMutableArray * FilmOrdnerArray;
    // Arrays fuer Filmsammlungen
    NSMutableArray * wdtvArray; // HD an WDTVLive
    NSMutableArray * magArray;
@@ -29,6 +30,11 @@
    NSMutableArray * Volumes_Array;
    
    NSMutableArray * Missed_HD_Array; // fehlende HDs, sollen bei Refresh gecheckt werden
+   
+   
+   NSMutableArray * Doppel_Array;
+  NSMutableArray * Denied_Array;
+
    
    IBOutlet NSTableView* filmTable;
    NSString* filmLink;
@@ -73,7 +79,7 @@
 
 @property (assign) IBOutlet  NSPopUpButton * volumepop;
 
-
+@property (assign) IBOutlet  NSTextView* VolumesView;
 
 
 
@@ -82,7 +88,7 @@
 @property (readonly, strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 
 
-@property NSMutableArray*   FilmOrdnerArray;
+@property NSMutableArray*   FilmSpeicherArray;
 
 
 @property NSIndexSet * clickset;
