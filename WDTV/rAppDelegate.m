@@ -279,13 +279,17 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    FilmOrdnerArray = [[NSMutableArray alloc]initWithCapacity:0]; // Order mit Pfaden zu Filmordnern auf Volumes
 
    NSArray * keys = [NSArray arrayWithObjects:NSURLVolumeURLForRemountingKey, nil];
+   
+   // gemountete Volumes
    NSArray * mountPaths = [fm mountedVolumeURLsIncludingResourceValuesForKeys:keys options:0];
    
    NSError * error;
    NSURL * remount;
-//   NSLog(@"mountPaths: %@",mountPaths);
+   NSLog(@"mountPaths: %@",mountPaths);
 
+   // Moegliche Ordnernamen
    NSArray* filmordnernamenarray = [NSArray arrayWithObjects:@"Archiv_Dok",@"Archiv_Krimi",@"Archiv_Tatort",@"Archiv_Spielfilm",@"Archiv_Western",@"Dok",@"Krimi",@"Tatort",@"Spielfilm",@"Western", nil];
+   // nicht zu durchsuchende Ordner
    NSArray* sperrordnernamenarray = [NSArray arrayWithObjects:@"Home",@"MobileBackups", nil];
    
    for (NSURL * mountPath in mountPaths)
@@ -621,9 +625,10 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    //  mountVolumeAppleScript(@"ruediheimlicher",@"rh47",@"WDTVLIVE",@"WDTV");
    
    self.errorfeld.string = [[self.errorfeld string]stringByAppendingFormat:@"%@\n",@"Refresh" ];
-   
+  
+   /*
    self.WDTV_Pfad = [NSString stringWithFormat:@"/Volumes/WDTV"];
-   NSLog(@"WDTV_Pfad: %@",self.WDTV_Pfad);
+   //NSLog(@"WDTV_Pfad: %@",self.WDTV_Pfad);
    
    //NSLog(@"home: %@",NSHomeDirectory());
    //NSURL* WDTV_URL=[NSURL fileURLWithPath:self.WDTV_Pfad];
@@ -689,7 +694,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    NSURL* ListeURL = [NSURL fileURLWithPath:ListePfad];
    
    //NSLog(@"ListeURL: %@",ListeURL );
-   
+   */
   
    if (FilmOrdnerArray.count)
    {
@@ -729,10 +734,13 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
       NSLog(@"RefreshFilmlisten FilmOrdnerArrayist leer");
 
    }
-//   NSLog(@"FilmSpeicherArray: %@",self.FilmSpeicherArray);
+   
+   // Liste aller Filme auf mounted Volumes, gelistet nach unterordnern
+   NSLog(@"FilmSpeicherArray: %@",self.FilmSpeicherArray);
+   
    
    NSString* titelString = [self titelListeAusFilmListe:self.FilmSpeicherArray];
-   NSLog(@"titelString: %@",titelString);
+   NSLog(@"titelString: \n%@",titelString);
    if ([self.FilmSpeicherArray count])
    {
 
@@ -1179,8 +1187,6 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
   //NSLog(@"TitelArray count: %d: \n%@",[TitelArray count],TitelArray );
    NSString* Liste = [NSString string];
    
- 
-   
    for (int i=0;i<ListeArray.count;i++)
    {
       NSString* temptitelstring = [[ListeArray objectAtIndex:i]objectForKey:@"titelstring"];
@@ -1191,18 +1197,16 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
       }
       
       temptitelstring = [temparray componentsJoinedByString:@" "];
-      for (NSString* st in temparray)
+      for (NSString* wort in temparray)
       {
-         if ([Liste containsString:st])
+         if ([Liste containsString:wort])
          {
-            //NSLog(@"Wort %@ schon da",st);
+            //NSLog(@"Wort %@ schon da",wort);
          }
       }
       
       
       if ([Liste containsString:temptitelstring])
-      
-         
       {
          NSLog(@"Titel schon da: %@",temptitelstring);
          NSString* doppelpfad = [[[[@"/Volumes"stringByAppendingPathComponent:[[ListeArray objectAtIndex:i]objectForKey:@"ort"]]
@@ -1232,7 +1236,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
             //NSLog(@"kein WD_TV_A answer: %d NSAlertAlternateReturn: %d",(int)answer, NSAlertAlternateReturn);
             if (answer == 1000) // 1000, delete
             {
-               NSLog(@"delete  : %d",(int)answer);
+               NSLog(@"answer 1000 delete  : %d",(int)answer);
                //[NSApp terminate:self];
                {
                   NSError* err;
@@ -1248,7 +1252,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
             }
             else if(answer == 1001) // 1001,nichts tun
             {
-               NSLog(@"nichts tun : %d",(int)answer);
+               NSLog(@"answer 1001 nichts tun : %d",(int)answer);
             }
             
          }
