@@ -31,31 +31,36 @@
 
 - (NSString *)displayName
 {
-    id value = nil;
-    NSError *error = nil;
-    BOOL success = NO;
-    
-    success = [_url getResourceValue:&value forKey:NSURLLocalizedNameKey error:&error];
-    if (success && !value) { //If we got a nil value for the localized name, we will try the non-localized name
-	success = [_url getResourceValue:&value forKey:NSURLNameKey error:&error];
-    }
-    
-    if (success)
-    {
-	if (value)
+   id value = nil;
+   NSError *error = nil;
+   BOOL success = NO;
+   
+   success = [_url getResourceValue:&value forKey:NSURLLocalizedNameKey error:&error];
+   if (success && !value) { //If we got a nil value for the localized name, we will try the non-localized name
+      success = [_url getResourceValue:&value forKey:NSURLNameKey error:&error];
+   }
+   
+   if (success)
    {
-	    return value;
-	}
+      if (value)
+      {
+         if ([value isEqualToString:@"Temporary Items"])
+         {
+            //return nil;
+         }
+         //NSLog(@"displayName: %@",value   );
+         return value;
+      }
+      else
+      {
+         return @""; //An empty string is more appropriate than nil
+      }
+      
+   }
    else
    {
-	    return @""; //An empty string is more appropriate than nil
-	}
-	
-    }
-    else
-    {
-       return [error localizedDescription];
-    }
+      return [error localizedDescription];
+   }
 }
 
 - (NSImage *)icon {

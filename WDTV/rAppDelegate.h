@@ -23,11 +23,13 @@
    NSMutableArray * magArray;
    NSMutableArray * TV_HD_A_Array;
    NSMutableArray * TV_HD_B_Array;
+   NSMutableArray * TV_HD_C_Array;
    NSMutableArray * Filmarchiv_Array;
    NSMutableArray * WD_TV_A_Array;
    NSMutableArray * WD_TV_B_Array;
    
    NSMutableArray * Volumes_Array;
+   NSMutableArray * ListeTitelArray;
    
    NSMutableArray * Missed_HD_Array; // fehlende HDs, sollen bei Refresh gecheckt werden
    
@@ -39,6 +41,8 @@
    IBOutlet NSTableView* filmTable;
    NSString* filmLink;
    NSURL* filmURL;
+   
+   IBOutlet NSPopUpButton* VolumePop;
 }
 @property (assign) IBOutlet NSWindow *window;
 @property (assign) IBOutlet  NSBrowser* tvbrowser;
