@@ -1064,7 +1064,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
       NSString* tempFilm = [derFilmArray objectAtIndex:i]; // WD_TV_A		Volumes	WD_TV_A	Tatort	Mag	Tatort 130323 Summ, Summ, Summ.mpg
       //NSString* tempFilmTitel = [[[filmArray objectAtIndex:i] stringByReplacingOccurrencesOfString:self.WDTV_Pfad withString:@""]substringFromIndex:1];// erstes tab weg
       
-      //NSLog(@"tempFilmTitel: %@",tempFilm );
+      NSLog(@"tempFilmTitel: %@",tempFilm );
       NSArray* tempElementeArray = [tempFilm componentsSeparatedByString:@"/"]; // Am anfang steht ein /
       
       //NSLog(@"tempFilmTitel: %@ anz: %d",tempFilm,[tempElementeArray count] );
@@ -2602,7 +2602,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
          
          if ([tempfilmpfad rangeOfString:filmsuchstring options:NSCaseInsensitiveSearch].length)
          {
-            //NSLog(@"tempfilmpfad: %@",tempfilmpfad);
+            NSLog(@"tempfilmpfad: %@",tempfilmpfad);
             NSMutableDictionary* findDic = [NSMutableDictionary dictionaryWithObjectsAndKeys:[tempfilmpfad lastPathComponent],@"titel",tempfilmpfad, @"url", [NSNumber numberWithInt:0], @"mark",[NSNumber numberWithInt:hd_da], @"playok", nil];
             [filmArray addObject:findDic];
             if ([self.resultatfeld.stringValue length])
