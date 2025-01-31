@@ -715,7 +715,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
             if (!(((NSString*)tempTitelArray.firstObject).length == 6))// Kein Trennzeichen nach Datumcode
             {
                NSLog(@"ListeTitelArray Fehler in tempZeile: %@ firstObject: %@",tempZeile,tempTitelArray.firstObject);
-               
+               continue;
             }
             else
             {
@@ -733,6 +733,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
          else
          {
             NSLog(@"ListeTitelArray Zeile leer");
+            continue;
          }
       }
       
@@ -754,7 +755,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
             if (!(((NSString*)tempTitelArray.firstObject).length == 6))// Kein Trennzeichen nach Datumcode
             {
                NSLog(@"new_titelArray Fehler in tempZeile: %@ firstObject: %@",tempZeile,tempTitelArray.firstObject);
-               
+               continue;
             }
             else
             {
@@ -1762,9 +1763,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
       NSLog(@"****\tFilmarrayVonGenreURL URL: %@",Genre_URL);
       
       NSMutableArray* Film_Ordner = [[NSMutableArray alloc]initWithCapacity:0];
-      
-      
-      NSFileManager *Filemanager=[NSFileManager defaultManager];
+       NSFileManager *Filemanager=[NSFileManager defaultManager];
       NSError* err=NULL;
       
       if ([Filemanager fileExistsAtPath:[Genre_URL path]])//ist vorhanden
@@ -1811,7 +1810,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
                                               includingPropertiesForKeys:[NSArray arrayWithObject:NSURLNameKey]
                                                                  options:NSDirectoryEnumerationSkipsHiddenFiles
                                                                    error:&err];
-         //NSLog(@"HD_OrdnerArray: %@",HD_OrdnerArray);
+         NSLog(@"HD_OrdnerArray: %@",HD_OrdnerArray);
          
          BOOL isDir;
          if ([HD_OrdnerArray count])
