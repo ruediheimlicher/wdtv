@@ -281,6 +281,12 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    NSArray * keys = [NSArray arrayWithObjects:NSURLVolumeURLForRemountingKey, nil];
    
    // gemountete Volumes
+   
+   NSArray<NSURL *> *mountedVolumes = [fm mountedVolumeURLsIncludingResourceValuesForKeys:nil options:0];
+
+   for (NSURL *volumeURL in mountedVolumes) {
+       NSLog(@"Mounted volume: %@", volumeURL.path);
+   }
    NSArray * mountPaths = [fm mountedVolumeURLsIncludingResourceValuesForKeys:keys options:0];
    
    NSError * error;
@@ -317,7 +323,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
                                                                 options:NSDirectoryEnumerationSkipsHiddenFiles
                                                                   error:&error];
 
-         
+             
          if ([tempVolumeArray count])
          {
             //NSLog(@"tempVolumeArray: %@ ",tempVolumeArray);
@@ -327,8 +333,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
                //NSLog(@"tempURL: %@\tpfad: %@ ",tempURL,pfad);
                if ([filmordnernamenarray containsObject:pfad])
                {
-                  
-                 // NSLog(@"pfad da: %@ ",pfad);
+                  NSLog(@"pfad da: %@ ",pfad);
                   [FilmOrdnerArray addObject:tempURL];
                }
                else if ([pfad isEqualToString:@"Filmarchiv"])
@@ -350,6 +355,11 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
                   //NSLog(@"FilmOrdnerArray: %@ ",FilmOrdnerArray);
 
                }
+               else
+               {
+                  NSLog(@"pfad nicht da: %@ ",pfad);
+                  exit;
+               }
                
             }
          }
@@ -358,16 +368,6 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
       }
       // Do something with the path URLs.
       
-      
-      
-      
-      /*
-       if(remount){
-       if ([[[NSURL URLWithString:share] host] isEqualToString:[remount host]] && [[[NSURL URLWithString:share] path] isEqualToString:[remount path]]) {
-       printf("Already mounted at %s\n", [[mountPath path] UTF8String]);
-       return 0;
-       }
-       */
    }
    //NSLog(@"finishLounching FilmOrdnerArray: %@",FilmOrdnerArray);
    
@@ -586,6 +586,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    // upload liste
    // Quelle: http://www.geronimobile.com/sending-image-from-xcode-to-server/
    //NSString *urlString = @"http://www.ruediheimlicher.ch/cgi-bin/wdtvlist.pl";
+   /*
    NSString *urlString = @"http://www.ruediheimlicher.ch/Data";
   
    NSString * theString=@"e88d";
@@ -600,7 +601,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
                                               fileName:@"hallo"];
    
    NSURLConnection* uploadConnection =[[NSURLConnection alloc] initWithRequest:urlRequest delegate:self];
-  
+  */
    // *************************************************
  
    NSNotificationCenter * nc;
@@ -615,6 +616,9 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    
    
    //NSString* oldkellerstring = [self KellerListe];
+   
+//   [NSUserDefaults.standardUserDefaults setBool:YES forKey:@"NSDiscardWindowsOnDocumentOpen"];
+
 }
 
 
@@ -671,7 +675,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    } // if FilmOrdnerArray.count
    else
    {
-      NSLog(@"RefreshFilmlisten FilmOrdnerArrayist leer");
+      NSLog(@"RefreshFilmlisten FilmOrdnerArray ist leer");
       
    }
    
@@ -3255,7 +3259,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
          NSAlert *OKalert = [NSAlert alertWithError:err];
          [OKalert addButtonWithTitle:@"OK"];
          [OKalert setMessageText:@"Film is not deleted"];
-         [OKalert setAlertStyle:NSWarningAlertStyle];
+         [OKalert setAlertStyle:NSAlertStyleWarning];
          [OKalert setInformativeText:[err description]];
          [OKalert runModal]; // Ignore return value.
          
@@ -3281,7 +3285,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    [alert addButtonWithTitle:@"Cancel"];
    [alert setMessageText:@"Delete Film?"];
    [alert setInformativeText:@"Deleted films cannot be restored."];
-   [alert setAlertStyle:NSWarningAlertStyle];
+   [alert setAlertStyle:NSAlertStyleWarning];
    if ([alert runModal] == NSAlertFirstButtonReturn)
    {
       // OK clicked, delete the record
@@ -3294,7 +3298,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
          NSAlert *OKalert = [[NSAlert alloc] init];
          [OKalert addButtonWithTitle:@"OK"];
          [OKalert setMessageText:@"Film is deleted"];
-         [OKalert setAlertStyle:NSWarningAlertStyle];
+         [OKalert setAlertStyle:NSAlertStyleWarning];
          [OKalert runModal];
          
          
@@ -3312,7 +3316,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
          NSAlert *OKalert = [NSAlert alertWithError:err];
          [OKalert addButtonWithTitle:@"OK"];
          [OKalert setMessageText:@"Film is not deleted"];
-         [OKalert setAlertStyle:NSWarningAlertStyle];
+         [OKalert setAlertStyle:NSAlertStyleWarning];
          [OKalert setInformativeText:[err description]];
          [OKalert runModal]; // Ignore return value.
          int trasherfolg = [self moveToTrash:selektierterPfad];
@@ -3338,7 +3342,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    [openPanel setPrompt:@"Archiv"];
    
    [openPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result){
-      if (result == NSFileHandlingPanelOKButton)
+      if (result == NSModalResponseOK)
       {
          NSLog(@"OK");
          NSURL *fileURL = [openPanel URL]; //OpenDlg is my NSOpenPanel
@@ -3386,7 +3390,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    
    [openPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result)
    {
-      if (result == NSFileHandlingPanelOKButton)
+      if (result == NSModalResponseOK)
       {
          NSLog(@"OK");
          NSURL *fileURL = [openPanel URL]; //OpenDlg is my NSOpenPanel
@@ -3863,24 +3867,30 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    NSLog(@"reportVolumePop popvolume: %@ volumeindex: %ld",popvolume,volumeindex);
    if (volumeindex < NSNotFound)
    {
-      NSLog(@"reportVolumePop  volume: %@",[Volumes_Array objectAtIndex:volumeindex]);
+      NSLog(@"volumepopwahl reportVolumePop  volume: %@",[Volumes_Array objectAtIndex:volumeindex]);
       NSString* volumepfad = [[[Volumes_Array objectAtIndex:volumeindex]objectForKey:@"path"]stringByDeletingLastPathComponent];
       
       
-      NSLog(@"reportVolumePop  neuer path: %@",volumepfad);
+      NSLog(@"volumepopwahl reportVolumePop  neuer path: %@",volumepfad);
       
-      self.rootNodePath = volumepfad;
+      [self.tvbrowser setPath:volumepfad];
+      
+      NSLog(@"volumepopwahl reportVolumePop path: *%@*",[self.tvbrowser path]);
+      
+      self.rootNodePath = volumepfad;// self.tvbrowser.setPath:volumepfad;
       
       NSLog(@"reportVolumePop path: %@ separator: %@",[self.tvbrowser path], [self.tvbrowser pathSeparator]);
       NSLog(@"reportVolumePop clickedColumn: %ld",(long)[self.tvbrowser clickedColumn]);
-      //[self.tvbrowser setPath:@"Volumes/WDTV"];
+      
       
       rootNode = [[FileSystemNode alloc] initWithURL:[NSURL fileURLWithPath:self.rootNodePath]];
+      NSLog(@"volumepopwahl reportVolumePop path: *%@*",[self.tvbrowser path]);
       [self.tvbrowser loadColumnZero];
-      NSLog(@"reportVolumePop path: *%@*",[self.tvbrowser path]);
+      NSLog(@"volumepopwahl reportVolumePop rootNodePath: *%@*",self.rootNodePath);
+     
       if ([self.tvbrowser clickedColumn]>=0)
       {
-         NSLog(@"reportVolumePop clickedColumn: %ld",(long)[self.tvbrowser clickedColumn]);
+         NSLog(@"volumepopwahl reportVolumePop clickedColumn: %ld",(long)[self.tvbrowser clickedColumn]);
          // [[self.tvbrowser parentForItemsInColumn:[self.tvbrowser lastColumn]]invalidateChildren];
       }
       
@@ -3888,7 +3898,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    }
    else
    {
-      self.rootNodePath = @"/Volumes";
+      self.rootNodePath = @"/Volumes/TV_25";
       [self.tvbrowser loadColumnZero];
    }
 }
