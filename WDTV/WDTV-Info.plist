@@ -37,5 +37,8 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>We need access to your local network to retrieve files.</string>
+
 </dict>
 </plist>

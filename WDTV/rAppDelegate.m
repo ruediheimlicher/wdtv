@@ -265,6 +265,10 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
 
 }
 
+int removeQuarantineAttribute(const char *path) {
+    return removexattr(path, "com.apple.quarantine", 0);
+}
+
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
    
@@ -284,20 +288,69 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    
    NSArray<NSURL *> *mountedVolumes = [fm mountedVolumeURLsIncludingResourceValuesForKeys:nil options:0];
 
-   for (NSURL *volumeURL in mountedVolumes) {
+   NSMutableArray* mountedPaths = NSMutableArray.new;
+   
+   NSMutableArray* filmordnerPathArray = NSMutableArray.new;
+   
+   for (NSURL *volumeURL in mountedVolumes) 
+   {
        NSLog(@"Mounted volume: %@", volumeURL.path);
+      NSString* temppath = volumeURL.path;
+      NSArray* pfadarray = [temppath pathComponents];
+      NSLog(@"pfadarray: %@", pfadarray);
+      
+      if(([pfadarray count] > 1) && ([[pfadarray objectAtIndex:1] isEqual: @"Volumes"]))
+      {
+         [mountedPaths  addObject:volumeURL.path];
+      }
+      
    }
+   NSLog(@"mountedPaths: %@", mountedPaths);
+   // Moegliche Ordnernamen
+   NSArray* filmordnernamenarray = [NSArray arrayWithObjects:@"Archiv_Dok",@"Archiv_Krimi",@"Archiv_Tatort",@"Archiv_Spielfilm",@"Archiv_Western",@"Dok",@"Krimi",@"Tatort",@"Spielfilm",@"Western",@"Archiv",@"Kids", nil];
+ 
+   NSError* err;
+   NSString* FilmPath = @"/Volumes/TV_25";
+   for (NSString* mountpath in mountedPaths)
+   {
+      //int r = removeQuarantineAttribute(mountpath);
+      
+      NSArray* tempVolumeArray =  [fm contentsOfDirectoryAtPath:(NSString *)mountpath 
+                                                          error:&err];
+      NSLog(@"tempVolumeArray: %@",tempVolumeArray);
+      for (NSString* filmordner in tempVolumeArray)
+      {
+         if([filmordnernamenarray containsObject:filmordner])
+         {
+            [filmordnerPathArray addObject:[FilmPath stringByAppendingPathComponent:filmordner]];
+            NSURL* tempURL = [NSURL fileURLWithPath:[FilmPath stringByAppendingPathComponent:filmordner]];
+            [FilmOrdnerArray addObject:tempURL];
+         }
+      }
+   }
+   
+   NSLog(@"filmordnerPathArray: %@",filmordnerPathArray);
+   
+   NSLog(@"FilmOrdnerArray: %@",FilmOrdnerArray);
+   
+   
+   // nicht zu durchsuchende Ordner
+
+   
+   
    NSArray * mountPaths = [fm mountedVolumeURLsIncludingResourceValuesForKeys:keys options:0];
    
    NSError * error;
    NSURL * remount;
    NSLog(@"mountPaths: %@",mountPaths);
-
+ 
    // Moegliche Ordnernamen
-   NSArray* filmordnernamenarray = [NSArray arrayWithObjects:@"Archiv_Dok",@"Archiv_Krimi",@"Archiv_Tatort",@"Archiv_Spielfilm",@"Archiv_Western",@"Dok",@"Krimi",@"Tatort",@"Spielfilm",@"Western", nil];
+ //  NSArray* filmordnernamenarray = [NSArray arrayWithObjects:@"Archiv_Dok",@"Archiv_Krimi",@"Archiv_Tatort",@"Archiv_Spielfilm",@"Archiv_Western",@"Dok",@"Krimi",@"Tatort",@"Spielfilm",@"Western", nil];
    // nicht zu durchsuchende Ordner
    NSArray* sperrordnernamenarray = [NSArray arrayWithObjects:@"Home",@"MobileBackups", nil];
    
+   
+   /*
    for (NSURL * mountPath in mountPaths)
    {
       //NSLog(@"mountPath: %@" ,mountPath);
@@ -312,12 +365,6 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
         
          //http://stackoverflow.com/questions/18178019/osx-how-to-access-to-properties-in-nsfilemanager-method-contentsofdirectoryatur
         
-         /*
-         NSArray *tempVolumeArray = [[NSFileManager defaultManager] contentsOfDirectoryAtURL:mountPath
-                                                                includingPropertiesForKeys:@[NSURLContentModificationDateKey, NSURLVolumeIdentifierKey, NSURLLocalizedNameKey,NSURLLocalizedTypeDescriptionKey]
-                                                                                   options:NSDirectoryEnumerationSkipsHiddenFiles
-                                                                                     error:nil];
-         */
          NSArray* tempVolumeArray =  [fm contentsOfDirectoryAtURL:mountPath
                                              includingPropertiesForKeys:[NSArray arrayWithObject:NSURLNameKey]
                                                                 options:NSDirectoryEnumerationSkipsHiddenFiles
@@ -351,7 +398,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
                      [FilmOrdnerArray addObject:tempURL];
                   }
                   
-               //   NSArray* tempOrdnerArray = [fm contentsOfDirectoryAtPath:[tempURL path] error:nil];
+                  //   NSArray* tempOrdnerArray = [fm contentsOfDirectoryAtPath:[tempURL path] error:nil];
                   //NSLog(@"FilmOrdnerArray: %@ ",FilmOrdnerArray);
 
                }
@@ -368,7 +415,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
       }
       // Do something with the path URLs.
       
-   }
+   } */
    //NSLog(@"finishLounching FilmOrdnerArray: %@",FilmOrdnerArray);
    
    
@@ -718,7 +765,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
             //NSLog(@"tempTitelArray.firstObject: %@ l: %lu",tempTitelArray.firstObject,(unsigned long)((NSString*)tempTitelArray.firstObject).length);
             if (!(((NSString*)tempTitelArray.firstObject).length == 6))// Kein Trennzeichen nach Datumcode
             {
-               NSLog(@"ListeTitelArray Fehler in tempZeile: %@ firstObject: %@",tempZeile,tempTitelArray.firstObject);
+               NSLog(@"ListeTitelArray Fehler in tempZeile: %@ firstObject: %@: kein Trennzeichen nach Datumcode",tempZeile,tempTitelArray.firstObject);
                continue;
             }
             else
@@ -758,7 +805,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
             //NSLog(@"tempTitelArray.firstObject: %@ l: %lu",tempTitelArray.firstObject,(unsigned long)((NSString*)tempTitelArray.firstObject).length);
             if (!(((NSString*)tempTitelArray.firstObject).length == 6))// Kein Trennzeichen nach Datumcode
             {
-               NSLog(@"new_titelArray Fehler in tempZeile: %@ firstObject: %@",tempZeile,tempTitelArray.firstObject);
+               NSLog(@"new_titelArray Fehler in tempZeile: %@ firstObject: %@:  Kein Trennzeichen nach Datumcode",tempZeile,tempTitelArray.firstObject);
                continue;
             }
             else
@@ -994,7 +1041,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
                                                   data:listData
                                               fileName:@"hallo"];
    
-   NSURLConnection* uploadConnection =[[NSURLConnection alloc] initWithRequest:urlRequest delegate:self];
+  // NSURLConnection* uploadConnection =[[NSURLConnection alloc] initWithRequest:urlRequest delegate:self];
    
    
    // *************************************************
@@ -2965,7 +3012,7 @@ void mountKellerAppleScript (NSString *usr, NSString *pwd, NSString *serv, NSStr
    // item or cancels the panel.
    [panel beginWithCompletionHandler:^(NSInteger result)
    {
-      if (result == NSFileHandlingPanelOKButton)
+      if (result == NSModalResponseOK)
       {
          NSURL*  theDoc = [[panel URLs] objectAtIndex:0];
          
@@ -4282,8 +4329,25 @@ objectValueForTableColumn:(NSTableColumn *)tableColumn
 */
 - (void) FensterSchliessenAktion:(NSNotification*)note
 {
-   //NSLog(@"FensterSchliessenAktion");
-   [NSApp terminate:self];
+   NSLog(@"FensterSchliessenAktion");
+   //[NSApp terminate:self];
+}
+
+// Called when a download has finished successfully
+- (void)connectionDidFinishDownloading:(NSURLConnection *)connection destinationURL:(NSURL *)destinationURL {
+    NSLog(@"Download finished: %@", destinationURL.path);
+}
+
+// Called periodically to report download progress
+- (void)connection:(NSURLConnection *)connection didWriteData:(long long)bytesWritten
+ totalBytesWritten:(long long)totalBytesWritten
+expectedTotalBytes:(long long)expectedTotalBytes {
+    NSLog(@"Download progress: %lld / %lld", totalBytesWritten, expectedTotalBytes);
+}
+
+// Called when a download fails
+- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
+    NSLog(@"Download failed: %@", error.localizedDescription);
 }
 
 
